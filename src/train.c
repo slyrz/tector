@@ -8,7 +8,6 @@
 #include <assert.h>
 
 #include "core/filter.h"
-#include "core/hash.h"
 #include "core/scanner.h"
 #include "core/rand.h"
 #include "core/vocab.h"
