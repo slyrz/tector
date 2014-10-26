@@ -1,5 +1,9 @@
-//  Copyright 2013 Google Inc. All Rights Reserved.
-
+/**
+ * This file incorporates derivative work covered by the
+ * following copyright and permission notice:
+ *
+ * Copyright 2013 Google Inc. All Rights Reserved.
+ */
 #include "neural_network.h"
 #include "math.h"
 #include "rand.h"

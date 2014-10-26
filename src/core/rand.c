@@ -1,3 +1,11 @@
+/**
+ * This file incorporates derivative work covered by the
+ * following copyright and permission notice:
+ *
+ * Copyright 2013 Google Inc. All Rights Reserved.
+ */
+#include "rand.h"
+
 static unsigned long long rnd = 1;
 
 int
