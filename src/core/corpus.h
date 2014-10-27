@@ -26,5 +26,7 @@ struct corpus {
 struct corpus *corpus_new (struct vocab *v);
 void corpus_free (struct corpus *c);
 void corpus_parse (struct corpus *c, const char *path);
+void corpus_grow (struct corpus *c, size_t words, size_t sentences);
+void corpus_rebuild (struct corpus *c);
 
 #endif

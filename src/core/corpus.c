@@ -2,17 +2,18 @@
 #include "scanner.h"
 #include "filter.h"
 #include "log.h"
+#include "mem.h"
 
 #include <string.h>
 
-#define resize(c,f) \
+#define resize(c,f,s) \
   do { \
-    if (((c)->f.cap << 2) < (c)->f.cap) \
+    if ((s) < (c)->f.cap) \
       fatal ("capacity overflow in corpus->%s", #f); \
-    (c)->f.cap = (c)->f.cap << 2; \
-    (c)->f.ptr = realloc ((c)->f.ptr, (c)->f.cap * sizeof ((c)->f.ptr[0])); \
+    (c)->f.cap = (s); \
+    (c)->f.ptr = reallocarray ((c)->f.ptr, (c)->f.cap, sizeof ((c)->f.ptr[0])); \
     if ((c)->f.ptr == NULL) \
-      fatal ("realloc of corpus->%s failed", #f); \
+      fatal ("reallocarray (corpus->%s) failed", #f); \
   } while (0)
 
 #define append(c,f,v) \
@@ -54,8 +55,8 @@ corpus_free (struct corpus *c)
   free (c);
 }
 
-static void
-rebuild_sentences (struct corpus *c)
+void
+corpus_rebuild (struct corpus *c)
 {
   size_t i;
   size_t j;
@@ -64,17 +65,25 @@ rebuild_sentences (struct corpus *c)
     c->sentences.ptr[i] = (struct sentence *) &c->words.ptr[j];
 }
 
+void
+corpus_grow (struct corpus *c, size_t w, size_t s)
+{
+  resize (c, words, sizepow2 (w));
+  resize (c, sentences, sizepow2 (s));
+  corpus_rebuild (c);
+}
+
 static void
 resize_words (struct corpus *c)
 {
-  resize (c, words);
-  rebuild_sentences (c);
+  resize (c, words, c->words.cap << 2);
+  corpus_rebuild (c);
 }
 
 static void
 resize_sentences (struct corpus *c)
 {
-  resize (c, sentences);
+  resize (c, sentences, c->sentences.cap << 2);
 }
 
 static void

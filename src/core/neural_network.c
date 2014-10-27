@@ -5,7 +5,8 @@
  * Copyright 2013 Google Inc. All Rights Reserved.
  */
 #include "neural_network.h"
-#include "math.h"
+#include "exp.h"
+#include "mem.h"
 #include "rand.h"
 
 #include <string.h>

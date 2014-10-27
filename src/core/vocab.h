@@ -28,16 +28,15 @@ struct vocab {
 
 struct vocab *vocab_new (void);
 struct vocab *vocab_new_from_path (const char *path);
-void vocab_free (struct vocab *t);
-
-void vocab_add (struct vocab *t, const char *w);
-struct vocab_entry *vocab_get (struct vocab *t, const char *w);
-int vocab_get_index (struct vocab *t, const char *w, size_t * i);
-void vocab_print (const struct vocab *t);
-void vocab_shrink (struct vocab *t);
-void vocab_grow (struct vocab *t, size_t cap);
-void vocab_encode (struct vocab *t);
-void vocab_save (struct vocab *t, const char *path);
-void vocab_load (struct vocab *t, const char *path);
+void vocab_free (struct vocab *v);
+void vocab_rebuild (struct vocab *v);
+void vocab_add (struct vocab *v, const char *w);
+struct vocab_entry *vocab_get (struct vocab *v, const char *w);
+int vocab_get_index (struct vocab *v, const char *w, size_t * i);
+void vocab_print (const struct vocab *v);
+void vocab_shrink (struct vocab *v);
+void vocab_grow (struct vocab *v, size_t cap);
+void vocab_encode (struct vocab *v);
+void vocab_rebuild (struct vocab *v);
 
 #endif

@@ -19,10 +19,12 @@ libcore_a_SOURCES = \
   src/core/corpus.c \
   src/core/exp.c \
   src/core/filter.c \
+  src/core/mem.c \
   src/core/neural_network.c \
   src/core/ngram.c \
   src/core/rand.c \
   src/core/scanner.c \
+  src/core/serialize.c \
   src/core/stem.c \
   src/core/stopwords.c \
   src/core/string.c \

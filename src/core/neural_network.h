@@ -19,8 +19,7 @@ struct neural_network {
   float *syn1;
 };
 
-struct neural_network *neural_network_new (struct vocab *v, size_t layer,
-                                           size_t window);
+struct neural_network *neural_network_new (struct vocab *v, size_t layer, size_t window);
 void neural_network_free (struct neural_network *n);
 void neural_network_train (struct neural_network *n, struct corpus *c);
 

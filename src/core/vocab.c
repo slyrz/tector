@@ -6,12 +6,11 @@
  */
 #include "config.h"
 #include "vocab.h"
+#include "serialize.h"
 #include "log.h"
+#include "mem.h"
 
 #include <string.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/types.h>
 
 static inline uint32_t
 hash (const char *restrict w)
@@ -20,18 +19,6 @@ hash (const char *restrict w)
   while (*w)
     h = (h ^ *w++) * 0x1000193;
   return h;
-}
-
-static size_t
-pow2 (size_t n)
-{
-  n--;
-  n |= n >> 1;
-  n |= n >> 2;
-  n |= n >> 4;
-  n |= n >> 8;
-  n |= n >> 16;
-  return ++n;
 }
 
 struct vocab *
@@ -82,13 +69,12 @@ load_factor (const struct vocab *v)
   return (float) v->len / (float) v->cap;
 }
 
-static void
-rebuild_table (struct vocab *v)
+void
+vocab_rebuild (struct vocab *v)
 {
   size_t i;
   size_t j;
 
-  memset (v->table, 0, v->cap * sizeof (struct vocab_entry *));
   for (i = 0; i < v->len; i++) {
     j = v->pool[i].hash;
     for (;;) {
@@ -103,18 +89,22 @@ rebuild_table (struct vocab *v)
 void
 vocab_grow (struct vocab *v, size_t cap)
 {
+  cap = sizepow2 (cap);
   if (cap < v->cap)
     return;
 
   v->cap = cap;
-  v->pool = realloc (v->pool, v->cap * sizeof (struct vocab_entry));
+  v->pool = reallocarray (v->pool, v->cap, sizeof (struct vocab_entry));
   if (v->pool == NULL)
-    fatal ("realloc (v->pool)");
-  v->table = realloc (v->table, v->cap * sizeof (struct vocab_entry *));
+    fatal ("reallocarray (v->pool)");
+
+  v->table = reallocarray (v->table, v->cap, sizeof (struct vocab_entry *));
   if (v->table == NULL)
-    fatal ("realloc (v->table)");
-  memset (v->pool + v->len, 0, (v->cap - v->len) * sizeof (struct vocab_entry));
-  rebuild_table (v);
+    fatal ("reallocarray (v->table)");
+
+  clearspace (v->pool, v->len, v->cap, sizeof (struct vocab_entry));
+  clearspace (v->table, 0, v->cap, sizeof (struct vocab_entry *));
+  vocab_rebuild (v);
 }
 
 static int
@@ -140,7 +130,7 @@ vocab_shrink (struct vocab *v)
       break;
     v->len--;
   }
-  rebuild_table (v);
+  vocab_rebuild (v);
 }
 
 static inline size_t
@@ -294,51 +284,4 @@ vocab_encode (struct vocab *v)
   free (count);
   free (binary);
   free (parent);
-}
-
-#define io(func,fd,ptr,size) \
-  do { \
-    if (func (fd, ptr, size) != (ssize_t) (size)) goto error; \
-  } while (0)
-
-void
-vocab_load (struct vocab *v, const char *path)
-{
-  size_t len = 0;
-  size_t cap = v->cap;
-  int fd;
-
-  fd = open (path, O_RDONLY);
-  if (fd == -1)
-    goto error;
-
-  io (read, fd, &len, sizeof (size_t));
-  if (len > cap) {
-    cap = pow2 (len);
-    vocab_grow (v, cap);
-  }
-  io (read, fd, v->pool, sizeof (struct vocab_entry) * len);
-  close (fd);
-  v->len = len;
-  v->cap = cap;
-  rebuild_table (v);
-  return;
-error:
-  warning ("failed writing vocab to file '%s'", path);
-}
-
-void
-vocab_save (struct vocab *v, const char *path)
-{
-  int fd;
-
-  fd = open (path, O_CREAT | O_TRUNC | O_WRONLY, 0666);
-  if (fd == -1)
-    goto error;
-  io (write, fd, &v->len, sizeof (size_t));
-  io (write, fd, v->pool, sizeof (struct vocab_entry) * v->len);
-  close (fd);
-  return;
-error:
-  warning ("failed writing vocab to file '%s'", path);
 }

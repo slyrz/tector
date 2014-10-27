@@ -9,6 +9,7 @@
 #include "core/scanner.h"
 #include "core/vocab.h"
 #include "core/log.h"
+#include "core/serialize.h"
 
 static void
 learn_sentence (struct vocab *v, char *s)
