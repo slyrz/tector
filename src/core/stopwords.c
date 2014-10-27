@@ -6,7 +6,7 @@
 
 #define len(x) (sizeof(x) / sizeof(x[0]))
 
-static char *stopwords[] = {
+const char *stopwords[] = {
   "about",
   "above",
   "after",
@@ -168,7 +168,7 @@ static char *stopwords[] = {
 static int
 cmp (const void *a, const void *b)
 {
-  return strcmp (a, *(const char **) b);
+  return strcmp (a, *(const char * const *) b);
 }
 
 int

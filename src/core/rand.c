@@ -9,14 +9,14 @@
 static unsigned long long rnd = 1;
 
 int
-getrand ()
+getrand (void)
 {
   rnd = rnd * 25214903917ll + 11;
   return (rnd & 0xffffffff);
 }
 
 float
-getrandf ()
+getrandf (void)
 {
   return ((getrand () & 0xffff) / 65536.0) - 0.5;
 }

@@ -1,4 +1,5 @@
 #include "config.h"
+#include "filter.h"
 #include "stopwords.h"
 #include "stem.h"
 #include "string.h"

@@ -36,5 +36,5 @@ reallocarray (void *ptr, size_t len, size_t size)
 void *
 clearspace (void *ptr, size_t len, size_t cap, size_t size)
 {
-  return memset (ptr + (len * size), 0, (cap - len) * size);
+  return memset ((char *) ptr + (len * size), 0, (cap - len) * size);
 }

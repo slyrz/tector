@@ -89,7 +89,7 @@ cvc (struct stem *restrict s, int i)
 }
 
 static inline int
-ends (struct stem *restrict s, char *w)
+ends (struct stem *restrict s, const char *w)
 {
   int l = w[0];
   if ((l > s->k + 1) || (w[l] != s->b[s->k]))
@@ -101,7 +101,7 @@ ends (struct stem *restrict s, char *w)
 }
 
 static inline void
-setto (struct stem *restrict s, char *w)
+setto (struct stem *restrict s, const char *w)
 {
   int l = w[0];
   memmove (s->b + s->j + 1, w + 1, l);
@@ -109,7 +109,7 @@ setto (struct stem *restrict s, char *w)
 }
 
 static inline void
-r (struct stem *restrict s, char *w)
+r (struct stem *restrict s, const char *w)
 {
   if (m (s))
     setto (s, w);
