@@ -1,4 +1,3 @@
-#include <err.h>
 #include <malloc.h>
 #include <math.h>
 #include <stdio.h>
@@ -13,6 +12,7 @@
 #include "core/vocab.h"
 #include "core/corpus.h"
 #include "core/neural_network.h"
+#include "core/log.h"
 
 const size_t dimensionality = 50;
 const size_t window = 5;
@@ -28,11 +28,20 @@ main (int argc, char **argv)
   size_t j;
 
   v = vocab_new_from_path ("vocab.bin");
+  if (v == NULL)
+    fatal ("vocab_new_from_path");
+
   c = corpus_new (v);
+  if (c == NULL)
+    fatal ("corpus_new");
+
   for (i = 1; i < (size_t) argc; i++)
     corpus_load (c, argv[i]);
 
   n = neural_network_new (v, dimensionality, window);
+  if (n == NULL)
+    fatal ("neural_network_new");
+
   neural_network_train (n, c);
 
   for (i = 0; i < 10; i++) {

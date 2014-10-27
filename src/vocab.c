@@ -8,6 +8,7 @@
 #include "core/filter.h"
 #include "core/scanner.h"
 #include "core/vocab.h"
+#include "core/log.h"
 
 static void
 learn_sentence (struct vocab *v, char *s)
@@ -24,8 +25,10 @@ learn_file (struct vocab *v, const char *path)
   char b[8192];
 
   s = scanner_new (path);
-  if (s == NULL)
+  if (s == NULL) {
+    error ("scanner_new (%s)", path);
     return;
+  }
   while (scanner_readline (s, b, sizeof (b)) >= 0) {
     if (*b)
       learn_sentence (v, filter (b));
@@ -41,17 +44,19 @@ main (int argc, char **argv)
 
   v = vocab_new ();
   if (v == NULL)
-    err (EXIT_FAILURE, "vocab_new");
+    fatal ("vocab_new");
+
   for (i = 1; i < argc; i++) {
-    fprintf (stderr, "learning '%s' (%d/%d)\n", argv[i], i, argc - 1);
+    info ("learning '%s' (file %d of %d)", argv[i], i, argc-1);
     learn_file (v, argv[i]);
   }
-  fprintf (stderr, "vocab contains %zu words\n", v->len);
+
+  debug ("vocab contains %zu words", v->len);
   vocab_shrink (v);
-  fprintf (stderr, "vocab shrinked to %zu words\n", v->len);
+  debug ("vocab shrinked to %zu words", v->len);
+
   vocab_encode (v);
   vocab_save (v, "vocab.bin");
-  vocab_print (v);
   vocab_free (v);
   return 0;
 }
