@@ -5,19 +5,13 @@
  * Copyright 2013 Google Inc. All Rights Reserved.
  */
 #include "config.h"
-
-#include <err.h>
-#include <stdio.h>
-#include <stddef.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
-
 #include "vocab.h"
+#include "log.h"
+
+#include <string.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/types.h>
 
 static inline uint32_t
 hash (const char *restrict w)
@@ -29,7 +23,7 @@ hash (const char *restrict w)
 }
 
 static size_t
-next_pow2 (size_t n)
+pow2 (size_t n)
 {
   n--;
   n |= n >> 1;
@@ -83,13 +77,13 @@ vocab_free (struct vocab *v)
 }
 
 static inline float
-vocab_load_factor (const struct vocab *v)
+load_factor (const struct vocab *v)
 {
   return (float) v->len / (float) v->cap;
 }
 
 static void
-vocab_rebuild_table (struct vocab *v)
+rebuild_table (struct vocab *v)
 {
   size_t i;
   size_t j;
@@ -115,15 +109,12 @@ vocab_grow (struct vocab *v, size_t cap)
   v->cap = cap;
   v->pool = realloc (v->pool, v->cap * sizeof (struct vocab_entry));
   if (v->pool == NULL)
-    goto error;
+    fatal ("realloc (v->pool)");
   v->table = realloc (v->table, v->cap * sizeof (struct vocab_entry *));
   if (v->table == NULL)
-    goto error;
+    fatal ("realloc (v->table)");
   memset (v->pool + v->len, 0, (v->cap - v->len) * sizeof (struct vocab_entry));
-  vocab_rebuild_table (v);
-  return;
-error:
-  err (EXIT_FAILURE, "vocab_grow failed");
+  rebuild_table (v);
 }
 
 static int
@@ -149,11 +140,11 @@ vocab_shrink (struct vocab *v)
       break;
     v->len--;
   }
-  vocab_rebuild_table (v);
+  rebuild_table (v);
 }
 
 static inline size_t
-vocab_find (struct vocab *v, uint32_t h, const char *w)
+find (struct vocab *v, uint32_t h, const char *w)
 {
   struct vocab_entry *entry;
   size_t i;
@@ -175,14 +166,14 @@ vocab_add (struct vocab *v, const char *w)
   struct vocab_entry *entry;
 
   uint32_t h = hash (w);
-  size_t i = vocab_find (v, h, w);
+  size_t i = find (v, h, w);
 
   if (v->table[i]) {
     v->table[i]->count++;
     return;
   }
 
-  if (vocab_load_factor (v) > 0.7)
+  if (load_factor (v) > 0.7)
     vocab_grow (v, v->cap << 2);
 
   entry = v->pool + v->len;
@@ -200,7 +191,7 @@ struct vocab_entry *
 vocab_get (struct vocab *v, const char *w)
 {
   uint32_t h = hash (w);
-  size_t i = vocab_find (v, h, w);
+  size_t i = find (v, h, w);
   return v->table[i];
 }
 
@@ -214,26 +205,6 @@ vocab_get_index (struct vocab *v, const char *w, size_t * i)
     return -1;
   *i = entry - v->pool;
   return 0;
-}
-
-static inline void
-vocab_entry_print (struct vocab_entry *entry, int i)
-{
-  printf (" [%6d] = { 0x%08x, %4d, '%s' }\n", i, entry->hash, entry->count,
-          entry->data);
-}
-
-void
-vocab_print (const struct vocab *v)
-{
-  size_t i;
-
-  printf ("Len:    %zu\n", v->len);
-  printf ("Cap:    %zu\n", v->cap);
-  printf ("Load:   %f\n", vocab_load_factor (v));
-  for (i = 0; i < v->len; i++) {
-    vocab_entry_print (&v->pool[i], i);
-  }
 }
 
 void
@@ -340,19 +311,20 @@ vocab_load (struct vocab *v, const char *path)
   fd = open (path, O_RDONLY);
   if (fd == -1)
     goto error;
+
   io (read, fd, &len, sizeof (size_t));
   if (len > cap) {
-    cap = next_pow2 (len);
+    cap = pow2 (len);
     vocab_grow (v, cap);
   }
   io (read, fd, v->pool, sizeof (struct vocab_entry) * len);
   close (fd);
   v->len = len;
   v->cap = cap;
-  vocab_rebuild_table (v);
+  rebuild_table (v);
   return;
 error:
-  warn ("failed writing vocab to file '%s'", path);
+  warning ("failed writing vocab to file '%s'", path);
 }
 
 void
@@ -368,5 +340,5 @@ vocab_save (struct vocab *v, const char *path)
   close (fd);
   return;
 error:
-  warn ("failed writing vocab to file '%s'", path);
+  warning ("failed writing vocab to file '%s'", path);
 }

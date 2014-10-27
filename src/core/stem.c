@@ -2,9 +2,7 @@
 #include "stem.h"
 #include "string.h"
 
-#include <stdio.h>
 #include <string.h>
-#include <stdint.h>
 
 struct stem {
   int k;
@@ -326,7 +324,6 @@ stem (char *w)
     step5 (&s);
   }
   s.k++;
-
-  nullterm (s.b, s.k);          // [s.k + 1] = 0;
+  nullterm (s.b, s.k);
   return s.k;
 }

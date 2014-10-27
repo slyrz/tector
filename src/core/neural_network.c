@@ -68,8 +68,7 @@ neural_network_free (struct neural_network *n)
 }
 
 static void
-neural_network_worker (struct neural_network *restrict n,
-                       struct sentence **restrict s, size_t k)
+worker (struct neural_network *restrict n, struct sentence **restrict s, size_t k)
 {
   const float alpha = 0.025;
 
@@ -157,5 +156,5 @@ neural_network_worker (struct neural_network *restrict n,
 void
 neural_network_train (struct neural_network *n, struct corpus *c)
 {
-  neural_network_worker (n, c->sentences.ptr, c->sentences.len);
+  worker (n, c->sentences.ptr, c->sentences.len);
 }

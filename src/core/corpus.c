@@ -78,7 +78,7 @@ resize_sentences (struct corpus *c)
 }
 
 static void
-corpus_add_sentence (struct corpus *c, char *s)
+add_sentence (struct corpus *c, char *s)
 {
   size_t n = 0;
   size_t x = 0;
@@ -111,7 +111,7 @@ corpus_load (struct corpus *c, const char *path)
   s = scanner_new (path);
   while (scanner_readline (s, b, sizeof (b)) >= 0) {
     if (*b)
-      corpus_add_sentence (c, filter (b));
+      add_sentence (c, filter (b));
   }
   scanner_free (s);
 }
