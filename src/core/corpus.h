@@ -25,6 +25,6 @@ struct corpus {
 
 struct corpus *corpus_new (struct vocab *v);
 void corpus_free (struct corpus *c);
-void corpus_load (struct corpus *c, const char *path);
+void corpus_parse (struct corpus *c, const char *path);
 
 #endif

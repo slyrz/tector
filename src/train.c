@@ -36,7 +36,7 @@ main (int argc, char **argv)
     fatal ("corpus_new");
 
   for (i = 1; i < (size_t) argc; i++)
-    corpus_load (c, argv[i]);
+    corpus_parse (c, argv[i]);
 
   n = neural_network_new (v, dimensionality, window);
   if (n == NULL)

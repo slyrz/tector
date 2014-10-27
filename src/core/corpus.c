@@ -103,7 +103,7 @@ add_sentence (struct corpus *c, char *s)
 }
 
 void
-corpus_load (struct corpus *c, const char *path)
+corpus_parse (struct corpus *c, const char *path)
 {
   struct scanner *s;
   char b[8192] = { 0 };
