@@ -3,10 +3,6 @@
 # clash with the C standard headers.
 DEFAULT_INCLUDES=
 
-if DEBUGGING
-  CFLAGS += -Wall -Wextra -Wno-unused-parameter
-endif
-
 noinst_LIBRARIES = \
   libcore.a
 

@@ -11,22 +11,9 @@ AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([foreign subdir-objects silent-rules])
 AM_MAINTAINER_MODE([enable])
 
-m4_include([m4/ax_compiler_vendor.m4])
-m4_include([m4/ax_check_compile_flag.m4])
-
 #-----------------------------------------------------------------------------
-# Define Package Options
+# Compiler
 #-----------------------------------------------------------------------------
-AC_ARG_ENABLE([debugging], AS_HELP_STRING([--enable-debugging], [compile with debugging functionality]), [
-  AS_IF([test "x$enable_debugging" = "xyes"], [debugging="yes"], [debugging="no"])
-], [debugging="no"])
-
-AM_CONDITIONAL([DEBUGGING], [test "x$debugging" = "xyes"])
-
-#-----------------------------------------------------------------------------
-# Checks For Compiler And Friends
-#-----------------------------------------------------------------------------
-AC_PROG_CC([gcc clang])
 AM_PROG_CC_C_O
 AC_PROG_CC_STDC
 AC_USE_SYSTEM_EXTENSIONS
@@ -46,14 +33,6 @@ AC_SEARCH_LIBS([expf],[m])
 AC_C_INLINE
 AC_C_RESTRICT
 
-AS_IF([test "x$debugging" = "xyes"], [
-  CFLAGS=`echo "-g $CFLAGS" | sed -e "s/-O[0-9]//"`
-], [
-  CFLAGS=""
-  AX_CHECK_COMPILE_FLAG([-march=native], [ CFLAGS="-march=native $CFLAGS" ])
-  AX_CHECK_COMPILE_FLAG([-Ofast], [ CFLAGS="-Ofast $CFLAGS" ])
-])
-
 #-----------------------------------------------------------------------------
 # End
 #-----------------------------------------------------------------------------
@@ -71,6 +50,4 @@ AC_MSG_RESULT([
 
         compiler: ............. ${CC}
         cflags: ............... ${CFLAGS}
-
-        debugging: ............ ${debugging}
 ])
