@@ -46,8 +46,7 @@ neural_network_new (struct vocab *v, size_t layer, size_t window)
 
   for (a = 0; a < n->size.vocab; a++)
     for (b = 0; b < n->size.layer; b++)
-      n->syn0[a * n->size.layer + b] =
-        getrandf () / n->size.layer;
+      n->syn0[a * n->size.layer + b] = getrandf () / n->size.layer;
 
   for (a = 0; a < n->size.vocab; a++)
     for (b = 0; b < n->size.layer; b++)
