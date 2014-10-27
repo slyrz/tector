@@ -8,7 +8,6 @@
 
 #include "core/filter.h"
 #include "core/scanner.h"
-#include "core/rand.h"
 #include "core/vocab.h"
 #include "core/corpus.h"
 #include "core/neural_network.h"
