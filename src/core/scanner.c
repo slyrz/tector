@@ -75,6 +75,8 @@ scanner_readline (struct scanner *s, char *b, size_t l)
   int c;
   int n;
 
+  *b = '\0';
+
   if (eof (s))
     return -1;
 
