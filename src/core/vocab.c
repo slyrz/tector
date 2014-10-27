@@ -75,6 +75,7 @@ vocab_rebuild (struct vocab *v)
   size_t i;
   size_t j;
 
+  clearspace (v->table, 0, v->cap, sizeof (struct vocab_entry *));
   for (i = 0; i < v->len; i++) {
     j = v->pool[i].hash;
     for (;;) {
@@ -103,7 +104,6 @@ vocab_grow (struct vocab *v, size_t cap)
     fatal ("reallocarray (v->table)");
 
   clearspace (v->pool, v->len, v->cap, sizeof (struct vocab_entry));
-  clearspace (v->table, 0, v->cap, sizeof (struct vocab_entry *));
   vocab_rebuild (v);
 }
 
