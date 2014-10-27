@@ -1,10 +1,26 @@
 #include "corpus.h"
 #include "scanner.h"
 #include "filter.h"
+#include "log.h"
 
-#include <err.h>
 #include <string.h>
-#include <assert.h>
+
+#define resize(c,f) \
+  do { \
+    if (((c)->f.cap << 2) < (c)->f.cap) \
+      fatal ("capacity overflow in corpus->%s", #f); \
+    (c)->f.cap = (c)->f.cap << 2; \
+    (c)->f.ptr = realloc ((c)->f.ptr, (c)->f.cap * sizeof ((c)->f.ptr[0])); \
+    if ((c)->f.ptr == NULL) \
+      fatal ("realloc of corpus->%s failed", #f); \
+  } while (0)
+
+#define append(c,f,v) \
+  do { \
+    if ((c)->f.len >= (c)->f.cap) \
+      resize_ ## f (c); \
+    (c)->f.ptr[(c)->f.len++] = v; \
+  } while (0)
 
 struct corpus *
 corpus_new (struct vocab *v)
@@ -39,7 +55,7 @@ corpus_free (struct corpus *c)
 }
 
 static void
-corpus_rebuild_sentences (struct corpus *c)
+rebuild_sentences (struct corpus *c)
 {
   size_t i;
   size_t j;
@@ -48,43 +64,17 @@ corpus_rebuild_sentences (struct corpus *c)
     c->sentences.ptr[i] = (struct sentence *) &c->words.ptr[j];
 }
 
-#define corpus_resize(b,n,s) \
-  do { \
-    if ((n) < (b).cap) \
-      err (EXIT_FAILURE, __func__); \
-    (b).cap = (n); \
-    (b).ptr = realloc ((b).ptr, (b).cap * (s)); \
-    if ((b).ptr == NULL) \
-      err (EXIT_FAILURE, __func__); \
-  } while (0)
-
 static void
-corpus_grow_words (struct corpus *c)
+resize_words (struct corpus *c)
 {
-  corpus_resize (c->words, c->words.cap << 2, sizeof (size_t));
-  corpus_rebuild_sentences (c);
+  resize (c, words);
+  rebuild_sentences (c);
 }
 
 static void
-corpus_grow_sentences (struct corpus *c)
+resize_sentences (struct corpus *c)
 {
-  corpus_resize (c->sentences, c->sentences.cap << 2, sizeof (struct sentence *));
-}
-
-static void
-corpus_write_word (struct corpus *c, size_t w)
-{
-  if (c->words.len >= c->words.cap)
-    corpus_grow_words (c);
-  c->words.ptr[c->words.len++] = w;
-}
-
-static void
-corpus_write_sentence (struct corpus *c, struct sentence *s)
-{
-  if (c->sentences.len >= c->sentences.cap)
-    corpus_grow_sentences (c);
-  c->sentences.ptr[c->sentences.len++] = s;
+  resize (c, sentences);
 }
 
 static void
@@ -94,13 +84,13 @@ corpus_add_sentence (struct corpus *c, char *s)
   size_t x = 0;
   char *w;
 
-  corpus_write_sentence (c, (struct sentence *) c->words.ptr + c->words.len);
-  corpus_write_word (c, 0);
+  append (c, sentences, (struct sentence *) c->words.ptr + c->words.len);
+  append (c, words, 0);
 
   while (w = strtok_r (s, " ", &s), w) {
     if (vocab_get_index (c->vocab, w, &x) != 0)
       continue;
-    corpus_write_word (c, x);
+    append (c, words, x);
     n++;
   }
   if (n == 0) {
@@ -120,10 +110,8 @@ corpus_load (struct corpus *c, const char *path)
 
   s = scanner_new (path);
   while (scanner_readline (s, b, sizeof (b)) >= 0) {
-    if (*b) {
-      filter (b);
-      corpus_add_sentence (c, b);
-    }
+    if (*b)
+      corpus_add_sentence (c, filter (b));
   }
   scanner_free (s);
 }
