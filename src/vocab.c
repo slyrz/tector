@@ -22,7 +22,7 @@ static void
 learn_file (struct vocab *v, const char *path)
 {
   struct scanner *s;
-  char b[8192];
+  char b[8192] = { 0 };
 
   s = scanner_new (path);
   if (s == NULL) {
@@ -47,7 +47,7 @@ main (int argc, char **argv)
     fatal ("vocab_new");
 
   for (i = 1; i < argc; i++) {
-    info ("learning '%s' (file %d of %d)", argv[i], i, argc-1);
+    info ("learning '%s' (file %d of %d)", argv[i], i, argc - 1);
     learn_file (v, argv[i]);
   }
 

@@ -116,7 +116,7 @@ void
 corpus_load (struct corpus *c, const char *path)
 {
   struct scanner *s;
-  char b[8192];
+  char b[8192] = { 0 };
 
   s = scanner_new (path);
   while (scanner_readline (s, b, sizeof (b)) >= 0) {

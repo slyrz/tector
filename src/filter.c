@@ -8,7 +8,7 @@ int
 main (int argc, char **argv)
 {
   struct scanner *s;
-  char b[8192];
+  char b[8192] = { 0 };
   int i;
 
   for (i = 1; i < argc; i++) {
