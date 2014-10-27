@@ -118,7 +118,8 @@ filter (char *src)
     d = filterword (out, w, strlen (w));
     if (d) {
       out += d;
-      *out++ = ' ';
+      if (*inp)
+        *out++ = ' ';
     }
   }
   nullterm (src, out - src);
