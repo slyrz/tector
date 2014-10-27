@@ -11,7 +11,7 @@ AM_INIT_AUTOMAKE([foreign subdir-objects silent-rules])
 AM_MAINTAINER_MODE([enable])
 
 #-----------------------------------------------------------------------------
-# Compiler
+# Compiler and Compiler Characteristics
 #-----------------------------------------------------------------------------
 AM_PROG_CC_C_O
 AC_PROG_CC_STDC
@@ -21,16 +21,25 @@ AC_GNU_SOURCE
 AC_PROG_RANLIB
 PKG_PROG_PKG_CONFIG
 
-#-----------------------------------------------------------------------------
-# Libraries
-#---------.-------------------------------------------------------------------
-AC_SEARCH_LIBS([expf],[m])
+AC_C_INLINE
+AC_C_CONST
+AC_C_RESTRICT
 
 #-----------------------------------------------------------------------------
-# Checks For Compiler Characteristics
-#-----------------------------------------------------------------------------
-AC_C_INLINE
-AC_C_RESTRICT
+# Functions, Headers and Libraries
+#---------.-------------------------------------------------------------------
+AC_SEARCH_LIBS([expf],[m])
+AC_CHECK_FUNCS([memmove])
+AC_CHECK_FUNCS([memset])
+AC_CHECK_FUNCS([munmap])
+AC_CHECK_HEADERS([fcntl.h])
+AC_CHECK_HEADERS([malloc.h])
+AC_FUNC_MMAP
+AC_FUNC_REALLOC
+AC_TYPE_SIZE_T
+AC_TYPE_SSIZE_T
+AC_TYPE_UINT32_T
+AC_TYPE_UINT64_T
 
 #-----------------------------------------------------------------------------
 # End
