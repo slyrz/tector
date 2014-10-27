@@ -21,10 +21,8 @@ struct neural_network *
 neural_network_new (struct vocab *v, size_t layer, size_t window)
 {
   struct neural_network *n;
-
   size_t a;
   size_t b;
-  size_t s;
 
   n = calloc (1, sizeof (struct neural_network));
   if (n == NULL)
@@ -35,22 +33,12 @@ neural_network_new (struct vocab *v, size_t layer, size_t window)
   n->size.layer = layer;
   n->size.window = window;
 
-  s = n->size.vocab * n->size.layer * sizeof (float);
-  if (s == 0)
-    goto error;
-
-  if (posix_memalign ((void **) &n->syn0, 128, s))
-    goto error;
-  if (posix_memalign ((void **) &n->syn1, 128, s))
+  if (neural_network_alloc (n) != 0)
     goto error;
 
   for (a = 0; a < n->size.vocab; a++)
     for (b = 0; b < n->size.layer; b++)
       n->syn0[a * n->size.layer + b] = getrandf () / n->size.layer;
-
-  for (a = 0; a < n->size.vocab; a++)
-    for (b = 0; b < n->size.layer; b++)
-      n->syn1[a * n->size.layer + b] = 0.0;
 
   return n;
 error:
@@ -65,6 +53,28 @@ neural_network_free (struct neural_network *n)
   free (n->syn0);
   free (n->syn1);
   free (n);
+}
+
+int
+neural_network_alloc (struct neural_network *n)
+{
+  const size_t s = n->size.vocab * n->size.layer;
+
+  freenull (n->syn0);
+  freenull (n->syn1);
+
+  if (posix_memalign ((void **) &n->syn0, 128, s))
+    goto error;
+  if (posix_memalign ((void **) &n->syn1, 128, s))
+    goto error;
+
+  clearspace (n->syn0, 0, sizeof (float), s);
+  clearspace (n->syn1, 0, sizeof (float), s);
+  return 0;
+error:
+  freenull (n->syn0);
+  freenull (n->syn1);
+  return -1;
 }
 
 static void

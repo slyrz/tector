@@ -101,3 +101,45 @@ error:
     close (fd);
   return -1;
 }
+
+int
+neural_network_load (struct neural_network *n, const char *path)
+{
+  int fd;
+
+  fd = open (path, flags_read);
+  if (fd == -1)
+    return -1;
+  if (check (read, fd, &n->size, sizeof (n->size)) != 0)
+    goto error;
+  if (neural_network_alloc (n) != 0)
+    goto error;
+  if (check (read, fd, n->syn0, n->size.vocab * n->size.layer * sizeof (float)) != 0)
+    goto error;
+  close (fd);
+  return 0;
+error:
+  if (fd >= 0)
+    close (fd);
+  return -1;
+}
+
+int
+neural_network_save (struct neural_network *n, const char *path)
+{
+  int fd;
+
+  fd = open (path, flags_write, 0666);
+  if (fd == -1)
+    return -1;
+  if (check (write, fd, &n->size, sizeof (n->size)) != 0)
+    goto error;
+  if (check (write, fd, n->syn0, n->size.vocab * n->size.layer * sizeof (float)) != 0)
+    goto error;
+  close (fd);
+  return 0;
+error:
+  if (fd >= 0)
+    close (fd);
+  return -1;
+}
