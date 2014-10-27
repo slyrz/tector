@@ -28,7 +28,7 @@ hash (const char *restrict w)
   return h;
 }
 
-size_t
+static size_t
 next_pow2 (size_t n)
 {
   n--;
@@ -116,13 +116,10 @@ vocab_grow (struct vocab *v, size_t cap)
   v->pool = realloc (v->pool, v->cap * sizeof (struct vocab_entry));
   if (v->pool == NULL)
     goto error;
-
   v->table = realloc (v->table, v->cap * sizeof (struct vocab_entry *));
   if (v->table == NULL)
     goto error;
-
-  memset (v->pool + v->len, 0,
-          (v->cap - v->len) * sizeof (struct vocab_entry));
+  memset (v->pool + v->len, 0, (v->cap - v->len) * sizeof (struct vocab_entry));
   vocab_rebuild_table (v);
   return;
 error:
@@ -254,6 +251,9 @@ vocab_encode (struct vocab *v)
   long long *count;
   long long *binary;
   long long *parent;
+
+  if (v->len == 0)
+    return;
 
   count = calloc (v->len * 2 + 1, sizeof (long long));
   binary = calloc (v->len * 2 + 1, sizeof (long long));
