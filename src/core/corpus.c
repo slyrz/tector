@@ -9,24 +9,24 @@
 struct corpus *
 corpus_new (struct vocab *v)
 {
-  struct corpus *result;
+  struct corpus *c;
 
-  result = calloc (1, sizeof (struct corpus));
-  if (result == NULL)
+  c = calloc (1, sizeof (struct corpus));
+  if (c == NULL)
     goto error;
-  result->vocab = v;
-  result->words.cap = 32768;
-  result->words.ptr = calloc (result->words.cap, sizeof (size_t));
-  if (result->words.ptr == NULL)
+  c->vocab = v;
+  c->words.cap = 32768;
+  c->words.ptr = calloc (c->words.cap, sizeof (size_t));
+  if (c->words.ptr == NULL)
     goto error;
-  result->sentences.cap = 1024;
-  result->sentences.ptr = calloc (result->sentences.cap, sizeof (struct sentence *));
-  if (result->sentences.ptr == NULL)
+  c->sentences.cap = 1024;
+  c->sentences.ptr = calloc (c->sentences.cap, sizeof (struct sentence *));
+  if (c->sentences.ptr == NULL)
     goto error;
-  return result;
+  return c;
 error:
-  if (result)
-    corpus_free (result);
+  if (c)
+    corpus_free (c);
   return NULL;
 }
 

@@ -43,36 +43,35 @@ next_pow2 (size_t n)
 struct vocab *
 vocab_new (void)
 {
-  struct vocab *result;
+  struct vocab *v;
 
-  result = calloc (1, sizeof (struct vocab));
-  if (result == NULL)
+  v = calloc (1, sizeof (struct vocab));
+  if (v == NULL)
     goto error;
-  result->len = 0;
-  result->cap = 32768;
-  result->pool = calloc (result->cap, sizeof (struct vocab_entry));
-  if (result->pool == NULL)
+  v->len = 0;
+  v->cap = 32768;
+  v->pool = calloc (v->cap, sizeof (struct vocab_entry));
+  if (v->pool == NULL)
     goto error;
-  result->table = calloc (result->cap, sizeof (struct vocab_entry *));
-  if (result->table == NULL)
+  v->table = calloc (v->cap, sizeof (struct vocab_entry *));
+  if (v->table == NULL)
     goto error;
-  return result;
+  return v;
 error:
-  if (result)
-    vocab_free (result);
+  if (v)
+    vocab_free (v);
   return NULL;
 }
 
 struct vocab *
 vocab_new_from_path (const char *path)
 {
-  struct vocab *result;
+  struct vocab *v;
 
-  result = vocab_new ();
-  if (result == NULL)
-    return NULL;
-  vocab_load (result, path);
-  return result;
+  v = vocab_new ();
+  if (v)
+    vocab_load (v, path);
+  return v;
 }
 
 void

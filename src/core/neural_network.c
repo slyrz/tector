@@ -19,43 +19,43 @@
 struct neural_network *
 neural_network_new (struct vocab *v, size_t layer, size_t window)
 {
-  struct neural_network *result;
+  struct neural_network *n;
 
   size_t a;
   size_t b;
-  size_t n;
+  size_t s;
 
-  result = calloc (1, sizeof (struct neural_network));
-  if (result == NULL)
+  n = calloc (1, sizeof (struct neural_network));
+  if (n == NULL)
     return NULL;
 
-  result->v = v;
-  result->size.vocab = v->len;
-  result->size.layer = layer;
-  result->size.window = window;
+  n->v = v;
+  n->size.vocab = v->len;
+  n->size.layer = layer;
+  n->size.window = window;
 
-  n = result->size.vocab * result->size.layer * sizeof (float);
-  if (n == 0)
+  s = n->size.vocab * n->size.layer * sizeof (float);
+  if (s == 0)
     goto error;
 
-  if (posix_memalign ((void **) &result->syn0, 128, n))
+  if (posix_memalign ((void **) &n->syn0, 128, s))
     goto error;
-  if (posix_memalign ((void **) &result->syn1, 128, n))
+  if (posix_memalign ((void **) &n->syn1, 128, s))
     goto error;
 
-  for (a = 0; a < result->size.vocab; a++)
-    for (b = 0; b < result->size.layer; b++)
-      result->syn0[a * result->size.layer + b] =
-        getrandf () / result->size.layer;
+  for (a = 0; a < n->size.vocab; a++)
+    for (b = 0; b < n->size.layer; b++)
+      n->syn0[a * n->size.layer + b] =
+        getrandf () / n->size.layer;
 
-  for (a = 0; a < result->size.vocab; a++)
-    for (b = 0; b < result->size.layer; b++)
-      result->syn1[a * result->size.layer + b] = 0.0;
+  for (a = 0; a < n->size.vocab; a++)
+    for (b = 0; b < n->size.layer; b++)
+      n->syn1[a * n->size.layer + b] = 0.0;
 
-  return result;
+  return n;
 error:
-  if (result)
-    neural_network_free (result);
+  if (n)
+    neural_network_free (n);
   return NULL;
 }
 
