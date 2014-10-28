@@ -3,47 +3,66 @@
 #include "string.h"
 
 #include <fcntl.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-
-#define eof(s) \
-  ((s)->pos >= (s)->len)
-
-#define get(s) \
-  ((eof (s)) ? -1 : (s)->data[(s)->pos++])
-
-#define peek(s) \
-  ((eof (s)) ? -1 : (s)->data[(s)->pos])
+#include <errno.h>
 
 static int
-getfilesize (const char *path)
+fetch (struct scanner *s)
 {
-  struct stat sbuf;
-  if (stat (path, &sbuf) != 0)
-    return 0;
-  return sbuf.st_size;
+  ssize_t r;
+
+  for (;;) {
+    if (r = read (s->fd, s->data, sizeof (s->data)), r <= 0) {
+      if ((r == -1) && (errno == EINTR))
+        continue;
+      return -1;
+    }
+    break;
+  }
+  s->len = (size_t) r;
+  s->pos = 0;
+  return 0;
+}
+
+static inline int
+endofbuffer (struct scanner *s)
+{
+  return (s->pos >= s->len);
+}
+
+static inline int
+endoffile (struct scanner *s)
+{
+  return endofbuffer (s) && fetch (s);
+}
+
+static inline int
+get (struct scanner *s)
+{
+  if (endoffile (s))
+    return -1;
+  return s->data[s->pos++];
+}
+
+static inline int
+peek (struct scanner *s)
+{
+  if (endoffile (s))
+    return -1;
+  return s->data[s->pos];
 }
 
 struct scanner *
 scanner_new (const char *path)
 {
-  struct scanner *s = NULL;
+  struct scanner *s;
 
   s = calloc (sizeof (struct scanner), 1);
   if (s == NULL)
     goto error;
-
   s->fd = open (path, O_RDONLY);
   if (s->fd < 0)
-    goto error;
-
-  s->len = getfilesize (path);
-  s->pos = 0;
-
-  s->data = mmap (0, s->len, PROT_READ, MAP_SHARED, s->fd, 0);
-  if (s->data == MAP_FAILED)
     goto error;
   return s;
 error:
@@ -55,8 +74,6 @@ error:
 void
 scanner_free (struct scanner *s)
 {
-  if (s->data)
-    munmap (s->data, s->len);
   close (s->fd);
   free (s);
 }
@@ -65,6 +82,8 @@ void
 scanner_rewind (struct scanner *s)
 {
   s->pos = 0;
+  s->len = 0;
+  lseek (s->fd, SEEK_SET, 0);
 }
 
 int
@@ -76,7 +95,7 @@ scanner_readline (struct scanner *s, char *b, size_t l)
 
   *b = '\0';
 
-  if (eof (s))
+  if (endoffile (s))
     return -1;
 
   while (c = get (s), c > 0) {
@@ -98,7 +117,7 @@ scanner_readline (struct scanner *s, char *b, size_t l)
       c = ' ';
     }
     if (i < l)
-      b[i++] = c;
+      b[i++] = (char) c;
   }
 
   /* Buffer can't hold line. */

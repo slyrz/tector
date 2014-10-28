@@ -7,7 +7,7 @@ struct scanner {
   int fd;
   size_t len;
   size_t pos;
-  unsigned char *data;
+  unsigned char data[8192];
 };
 
 struct scanner *scanner_new (const char *path);
