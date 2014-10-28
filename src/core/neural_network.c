@@ -57,18 +57,18 @@ neural_network_free (struct neural_network *n)
 int
 neural_network_alloc (struct neural_network *n)
 {
-  const size_t s = n->size.vocab * n->size.layer;
+  const size_t cap = n->size.vocab * n->size.layer;
 
   freenull (n->syn0);
   freenull (n->syn1);
 
-  if (posix_memalign ((void **) &n->syn0, 128, s))
+  if (posix_memalign ((void **) &n->syn0, 128, cap * sizeof (float)))
     goto error;
-  if (posix_memalign ((void **) &n->syn1, 128, s))
+  if (posix_memalign ((void **) &n->syn1, 128, cap * sizeof (float)))
     goto error;
 
-  clearspace (n->syn0, 0, sizeof (float), s);
-  clearspace (n->syn1, 0, sizeof (float), s);
+  clearspace (n->syn0, 0, sizeof (float), cap);
+  clearspace (n->syn1, 0, sizeof (float), cap);
   return 0;
 error:
   freenull (n->syn0);
