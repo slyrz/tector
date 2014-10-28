@@ -163,7 +163,7 @@ vocab_add (struct vocab *v, const char *w)
     return;
   }
 
-  if (load_factor (v) > 0.7)
+  if (load_factor (v) > 0.7f)
     vocab_grow (v, v->cap << 2);
 
   entry = v->pool + v->len;
