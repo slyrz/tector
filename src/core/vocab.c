@@ -13,7 +13,7 @@
 #include <string.h>
 
 static inline uint32_t
-hash (const char *restrict w)
+hash (const unsigned char *restrict w)
 {
   uint32_t h = 0x811c9dc5;
   while (*w)
