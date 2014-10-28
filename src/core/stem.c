@@ -21,7 +21,7 @@ cons (struct stem *restrict s, size_t i)
     case 'u':
       return 0;
     case 'y':
-      return (i == 0) || !cons (s, i - 1);
+      return (i == 0) || ((i > 0) && !cons (s, i - 1));
     default:
       return 1;
   }
@@ -96,7 +96,10 @@ ends (struct stem *restrict s, const char *w)
     return 0;
   if (memcmp (s->b + s->k - l + 1, w + 1, l))
     return 0;
-  s->j = s->k - l;
+  if (l < s->k)
+    s->j = s->k - l;
+  else
+    s->j = 0;
   return 1;
 }
 
@@ -119,16 +122,18 @@ static inline void
 step1ab (struct stem *restrict s)
 {
   if (s->b[s->k] == 's') {
-    if (ends (s, "\04sses"))
-      s->k -= 2;
+    if (ends (s, "\04sses")) {
+      s->k -= (s->k > 0);
+      s->k -= (s->k > 0);
+    }
     else if (ends (s, "\03ies"))
       setto (s, "\01i");
     else if (s->b[s->k - 1] != 's')
-      s->k--;
+      s->k -= (s->k > 0);
   }
   if (ends (s, "\03eed")) {
     if (m (s) > 0)
-      s->k--;
+      s->k -= (s->k > 0);
   }
   else if ((ends (s, "\02ed") || ends (s, "\03ing")) && vowelinstem (s)) {
     s->k = s->j;
@@ -139,7 +144,7 @@ step1ab (struct stem *restrict s)
     else if (ends (s, "\02iz"))
       setto (s, "\03ize");
     else if (doublec (s, s->k)) {
-      s->k--;
+      s->k -= (s->k > 0);
       {
         int ch = s->b[s->k];
         if (ch == 'l' || ch == 's' || ch == 'z')
@@ -296,10 +301,10 @@ step5 (struct stem *restrict s)
   if (s->b[s->k] == 'e') {
     size_t a = m (s);
     if (a > 1 || (a == 1 && !cvc (s, s->k - 1)))
-      s->k--;
+      s->k -= (s->k > 0);
   }
   if (s->b[s->k] == 'l' && doublec (s, s->k) && m (s) > 1)
-    s->k--;
+    s->k -= (s->k > 0);
 }
 
 size_t
@@ -315,13 +320,16 @@ stem (char *w)
 
   s.k--;
   step1ab (&s);
-  if (s.k) {
+  if (s.k)
     step1c (&s);
+  if (s.k)
     step2 (&s);
+  if (s.k)
     step3 (&s);
+  if (s.k)
     step4 (&s);
+  if (s.k)
     step5 (&s);
-  }
   s.k++;
   nullterm (s.b, s.k);
   return s.k;
