@@ -3,14 +3,16 @@
 
 #include <stdlib.h>
 
-/**
- * Testing ASCII character classes. Not using <ctypes.h> because we really
- * want to work with ASCII only.
- */
-#define isupper(x)     (((x) >= 'A') && ((x) <= 'Z'))
-#define islower(x)     (((x) >= 'a') && ((x) <= 'z'))
-#define isspace(x)     (((x) <= ' ') || ((x) == '\x7f'))
-#define isunicode(x)   ((x) & 0x80)
+int isupper(int c);
+int islower(int c);
+int isspace(int c);
+int isalpha(int c);
+int isunicode(int c);
+
+char lowercase (int c);
+char uppercase (int c);
+
+int ordalpha (int c);
 
 void nullterm (char *s, size_t l);
 
