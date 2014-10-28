@@ -81,8 +81,8 @@ worker (struct neural_network *restrict n, struct sentence **restrict s, size_t 
 {
   const float alpha = 0.025f;
 
-  const long long sw = n->size.window;
-  const long long sl = n->size.layer;
+  const size_t sw = n->size.window;
+  const size_t sl = n->size.layer;
 
   long long a, b, c, d, e;
 
@@ -108,7 +108,7 @@ worker (struct neural_network *restrict n, struct sentence **restrict s, size_t 
     // TODO: adjust alpha
     // cbow
     for (j = 0; j < s[i]->len; j++) {
-      b = nrand48 (rnd) % sw;
+      b = (long long) nrand48 (rnd) % sw;
       d = 0;
       // in -> hidden
       for (a = b; a < sw * 2 + 1 - b; a++) {
@@ -125,7 +125,7 @@ worker (struct neural_network *restrict n, struct sentence **restrict s, size_t 
       if (d == 0)
         continue;
       for (c = 0; c < sl; c++)
-        neu1[c] /= d;
+        neu1[c] /= (float) d;
       // hs
       code = entry (n->v, s, i, j).code;
       point = entry (n->v, s, i, j).point;
@@ -136,7 +136,7 @@ worker (struct neural_network *restrict n, struct sentence **restrict s, size_t 
           f += neu1[c] * n->syn1[c + e];
         f = expf (f);
         if (f >= 0.0f) {
-          g = (1 - (code & 1) - f) * alpha;
+          g = (1.0f - (float) (code & 1) - f) * alpha;
           for (c = 0; c < sl; c++)
             neu2[c] += g * n->syn1[c + e];
           for (c = 0; c < sl; c++)
