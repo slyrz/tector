@@ -120,9 +120,9 @@ scanner_readline (struct scanner *s, char *b, size_t l)
       b[i++] = (char) c;
   }
 
-  /* Buffer can't hold line. */
+  /* Buffer can't hold line. Ignore it and return the next line. */
   if (i >= l)
-    i = 0;
+    return scanner_readline (s, b, l);
 
   /* Remove space at the end of buffer with null. */
   nullterm (b, i);
