@@ -7,7 +7,6 @@
 #include "neural_network.h"
 #include "exp.h"
 #include "mem.h"
-#include "rand.h"
 
 #include <string.h>
 
@@ -38,7 +37,7 @@ neural_network_new (struct vocab *v, size_t layer, size_t window)
 
   for (a = 0; a < n->size.vocab; a++)
     for (b = 0; b < n->size.layer; b++)
-      n->syn0[a * n->size.layer + b] = getrandf () / n->size.layer;
+      n->syn0[a * n->size.layer + b] = (float) (drand48 () - 0.5) / (float) n->size.layer;
 
   return n;
 error:
@@ -100,6 +99,8 @@ worker (struct neural_network *restrict n, struct sentence **restrict s, size_t 
   float *restrict neu1;
   float *restrict neu2;
 
+  unsigned short rnd[3] = { 1, 2, 3 };
+
   neu1 = calloc (sl, sizeof (float));
   neu2 = calloc (sl, sizeof (float));
 
@@ -107,7 +108,7 @@ worker (struct neural_network *restrict n, struct sentence **restrict s, size_t 
     // TODO: adjust alpha
     // cbow
     for (j = 0; j < s[i]->len; j++) {
-      b = getrand () % sw;
+      b = nrand48 (rnd) % sw;
       d = 0;
       // in -> hidden
       for (a = b; a < sw * 2 + 1 - b; a++) {

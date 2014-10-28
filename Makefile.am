@@ -18,7 +18,6 @@ libcore_a_SOURCES = \
   src/core/mem.c \
   src/core/neural_network.c \
   src/core/ngram.c \
-  src/core/rand.c \
   src/core/scanner.c \
   src/core/serialize.c \
   src/core/stem.c \
