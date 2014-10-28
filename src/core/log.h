@@ -31,6 +31,6 @@ static const char *levels[] = {
   } while (0)
 
 #define progress(i,t,msg,...) \
-  info (msg " => %.2f %%", ##__VA_ARGS__, ((float) (i) / (float) (t)) * 100.0)
+  info (msg " => %.2f %%", ##__VA_ARGS__, ((float) (i) / (float) (t)) * 100.0f)
 
 #endif

@@ -18,5 +18,5 @@ getrand (void)
 float
 getrandf (void)
 {
-  return ((getrand () & 0xffff) / 65536.0) - 0.5;
+  return ((getrand () & 0xffff) / 65536.0f) - 0.5f;
 }

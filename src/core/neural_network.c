@@ -80,7 +80,7 @@ error:
 static void
 worker (struct neural_network *restrict n, struct sentence **restrict s, size_t k)
 {
-  const float alpha = 0.025;
+  const float alpha = 0.025f;
 
   const long long sw = n->size.window;
   const long long sl = n->size.layer;
