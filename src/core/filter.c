@@ -18,16 +18,14 @@
 static inline int
 filter01 (char *restrict w, char **n)
 {
-  unsigned int v = 0;
   char *d = w;
   int c = 0;
+  int v = 0;
 
   while (*w) {
-    *d = *w;
-    if (isupper (*d))
-      *d += ('a' - 'A');
-    if (islower (*d)) {
-      v |= 1 << ((*d - 'a') & 0x1f);
+    *d = lowercase (*w);
+    if (isalpha (*d)) {
+      v |= 1 << ordalpha (*d);
       d++;
       c++;
     }
@@ -35,10 +33,8 @@ filter01 (char *restrict w, char **n)
       break;
     w++;
   }
-
   if (*w)
     *n = w + 1;
-
   *d = '\0';
 
   /**
