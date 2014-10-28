@@ -81,11 +81,11 @@ filter03 (char *restrict w, char **n)
  * thus can work in-place. The filtered word will never exceed the unfiltered
  * word, so no buffer overflows.
  */
-static int
-filterword (char *dst, char *src, int l)
+static size_t
+filterword (char *dst, char *src, size_t l)
 {
   char *br = NULL;
-  int k = 0;
+  size_t k;
 
   if (*src == '\0')
     return 0;
@@ -94,6 +94,7 @@ filterword (char *dst, char *src, int l)
     memmove (dst, src, l);
   dst[l] = '\0';
 
+  k = 0;
   perform (filter01, dst, &br);
   perform (filter02, dst, &br);
   perform (filter03, dst, &br);
@@ -102,7 +103,7 @@ abort:
   if (br) {
     if (k)
       dst[k++] = ' ';
-    k += filterword (dst + k, br, l - (br - dst));
+    k += filterword (dst + k, br, l - (size_t) (br - dst));
   }
   return k;
 }
@@ -113,7 +114,7 @@ filter (char *src)
   char *inp = src;
   char *out = src;
   char *w;
-  int d;
+  size_t d;
 
   while (w = strtok_r (inp, " ", &inp), w) {
     d = filterword (out, w, strlen (w));
@@ -123,6 +124,6 @@ filter (char *src)
         *out++ = ' ';
     }
   }
-  nullterm (src, out - src);
+  nullterm (src, (size_t) (out - src));
   return src;
 }
