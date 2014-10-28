@@ -5,13 +5,13 @@
 #include <string.h>
 
 struct stem {
-  int k;
-  int j;
+  size_t k;
+  size_t j;
   char *b;
 };
 
 static inline int
-cons (struct stem *restrict s, int i)
+cons (struct stem *restrict s, size_t i)
 {
   switch (s->b[i]) {
     case 'a':
@@ -27,11 +27,11 @@ cons (struct stem *restrict s, int i)
   }
 }
 
-static inline int
+static inline size_t
 m (struct stem *restrict s)
 {
-  int n = 0;
-  int i = 0;
+  size_t n = 0;
+  size_t i = 0;
   for (;;) {
     if (i > s->j)
       return n;
@@ -64,7 +64,7 @@ m (struct stem *restrict s)
 static inline int
 vowelinstem (struct stem *restrict s)
 {
-  int i;
+  size_t i;
   for (i = 0; i <= s->j; i++)
     if (!cons (s, i))
       return 1;
@@ -72,13 +72,13 @@ vowelinstem (struct stem *restrict s)
 }
 
 static inline int
-doublec (struct stem *restrict s, int j)
+doublec (struct stem *restrict s, size_t j)
 {
   return (j > 0) && (cons (s, j)) && (s->b[j] == s->b[j - 1]);
 }
 
 static inline int
-cvc (struct stem *restrict s, int i)
+cvc (struct stem *restrict s, size_t i)
 {
   int ch;
   if ((i >= 2) && cons (s, i) && !cons (s, i - 1) && cons (s, i - 2)) {
@@ -91,7 +91,7 @@ cvc (struct stem *restrict s, int i)
 static inline int
 ends (struct stem *restrict s, const char *w)
 {
-  int l = w[0];
+  size_t l = (size_t) w[0];
   if ((l > s->k + 1) || (w[l] != s->b[s->k]))
     return 0;
   if (memcmp (s->b + s->k - l + 1, w + 1, l))
@@ -103,7 +103,7 @@ ends (struct stem *restrict s, const char *w)
 static inline void
 setto (struct stem *restrict s, const char *w)
 {
-  int l = w[0];
+  size_t l = (size_t) w[0];
   memmove (s->b + s->j + 1, w + 1, l);
   s->k = s->j + l;
 }
@@ -294,7 +294,7 @@ step5 (struct stem *restrict s)
 {
   s->j = s->k;
   if (s->b[s->k] == 'e') {
-    int a = m (s);
+    size_t a = m (s);
     if (a > 1 || (a == 1 && !cvc (s, s->k - 1)))
       s->k--;
   }
@@ -302,8 +302,7 @@ step5 (struct stem *restrict s)
     s->k--;
 }
 
-// TODO: use size_t for lengths
-int
+size_t
 stem (char *w)
 {
   struct stem s = (struct stem) {
