@@ -69,7 +69,7 @@ load_factor (const struct vocab *v)
   return (float) v->len / (float) v->cap;
 }
 
-void
+int
 vocab_rebuild (struct vocab *v)
 {
   size_t i;
@@ -85,26 +85,28 @@ vocab_rebuild (struct vocab *v)
     }
     v->table[j % v->cap] = &v->pool[i];
   }
+  return 0;
 }
 
-void
+int
 vocab_grow (struct vocab *v, size_t cap)
 {
   cap = sizepow2 (cap);
   if (cap < v->cap)
-    return;
+    return 0;
 
   v->cap = cap;
   v->pool = reallocarray (v->pool, v->cap, sizeof (struct vocab_entry));
   if (v->pool == NULL)
-    fatal ("reallocarray (v->pool)");
-
+    return -1;
   v->table = reallocarray (v->table, v->cap, sizeof (struct vocab_entry *));
   if (v->table == NULL)
-    fatal ("reallocarray (v->table)");
+    return -1;
 
   clearspace (v->pool, v->len, v->cap, sizeof (struct vocab_entry));
-  vocab_rebuild (v);
+  if (vocab_rebuild (v) != 0)
+    return -1;
+  return 0;
 }
 
 static int
@@ -121,7 +123,7 @@ cmp (const void *a, const void *b)
   return (int) y->count - (int) x->count;
 }
 
-void
+int
 vocab_shrink (struct vocab *v)
 {
   qsort (v->pool, v->len, sizeof (struct vocab_entry), cmp);
@@ -130,7 +132,9 @@ vocab_shrink (struct vocab *v)
       break;
     v->len--;
   }
-  vocab_rebuild (v);
+  if (vocab_rebuild (v) != 0)
+    return -1;
+  return 0;
 }
 
 static inline size_t
@@ -150,7 +154,7 @@ find (struct vocab *v, uint32_t h, const char *w)
   return i % v->cap;
 }
 
-void
+int
 vocab_add (struct vocab *v, const char *w)
 {
   struct vocab_entry *entry;
@@ -160,11 +164,12 @@ vocab_add (struct vocab *v, const char *w)
 
   if (v->table[i]) {
     v->table[i]->count++;
-    return;
+    return 0;
   }
 
   if (load_factor (v) > 0.7f)
-    vocab_grow (v, v->cap << 2);
+    if (vocab_grow (v, v->cap << 2) != 0)
+      return -1;
 
   entry = v->pool + v->len;
   entry->hash = h;
@@ -175,6 +180,7 @@ vocab_add (struct vocab *v, const char *w)
 
   v->table[i] = v->pool + v->len;
   v->len++;
+  return 0;
 }
 
 struct vocab_entry *
@@ -197,7 +203,7 @@ vocab_get_index (struct vocab *v, const char *w, size_t * i)
   return 0;
 }
 
-void
+int
 vocab_encode (struct vocab *v)
 {
   struct vocab_entry *entry;
@@ -213,12 +219,20 @@ vocab_encode (struct vocab *v)
   long long *binary;
   long long *parent;
 
+  int r = 0;
+
   if (v->len == 0)
-    return;
+    return 0;
 
   count = calloc (v->len * 2 + 1, sizeof (long long));
   binary = calloc (v->len * 2 + 1, sizeof (long long));
   parent = calloc (v->len * 2 + 1, sizeof (long long));
+
+  r |= (count == NULL);
+  r |= (binary == NULL);
+  r |= (parent == NULL);
+  if (r)
+    goto cleanup;
 
   for (a = 0; a < v->len; a++)
     count[a] = v->pool[a].count;
@@ -281,7 +295,9 @@ vocab_encode (struct vocab *v)
     entry++;
   }
 
+cleanup:
   free (count);
   free (binary);
   free (parent);
+  return -r;
 }

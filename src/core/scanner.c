@@ -78,12 +78,14 @@ scanner_free (struct scanner *s)
   free (s);
 }
 
-void
+int
 scanner_rewind (struct scanner *s)
 {
   s->pos = 0;
   s->len = 0;
-  lseek (s->fd, SEEK_SET, 0);
+  if (lseek (s->fd, SEEK_SET, 0) < 0)
+    return -1;
+  return 0;
 }
 
 int

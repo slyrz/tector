@@ -164,8 +164,9 @@ worker (struct neural_network *restrict n, struct sentence **restrict s, size_t 
   free (neu2);
 }
 
-void
+int
 neural_network_train (struct neural_network *n, struct corpus *c)
 {
   worker (n, c->sentences.ptr, c->sentences.len);
+  return 0;
 }

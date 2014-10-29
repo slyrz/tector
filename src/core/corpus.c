@@ -9,17 +9,18 @@
 #define resize(c,f,s) \
   do { \
     if ((s) < (c)->f.cap) \
-      fatal ("capacity overflow in corpus->%s", #f); \
+      return -1; \
     (c)->f.cap = (s); \
     (c)->f.ptr = reallocarray ((c)->f.ptr, (c)->f.cap, sizeof ((c)->f.ptr[0])); \
     if ((c)->f.ptr == NULL) \
-      fatal ("reallocarray (corpus->%s) failed", #f); \
+      return -1; \
   } while (0)
 
 #define append(c,f,v) \
   do { \
     if ((c)->f.len >= (c)->f.cap) \
-      resize_ ## f (c); \
+      if (resize_ ## f (c, (c)->f.cap << 2) != 0) \
+        return -1; \
     (c)->f.ptr[(c)->f.len++] = v; \
   } while (0)
 
@@ -55,7 +56,7 @@ corpus_free (struct corpus *c)
   free (c);
 }
 
-void
+int
 corpus_rebuild (struct corpus *c)
 {
   size_t i;
@@ -63,30 +64,35 @@ corpus_rebuild (struct corpus *c)
 
   for (i = j = 0; i < c->sentences.len; i += 1, j += 1 + c->words.ptr[j])
     c->sentences.ptr[i] = (struct sentence *) &c->words.ptr[j];
+  return 0;
 }
 
-void
+static int
+resize_words (struct corpus *c, size_t cap)
+{
+  resize (c, words, cap);
+  if (corpus_rebuild (c) != 0)
+    return -1;
+  return 0;
+}
+
+static int
+resize_sentences (struct corpus *c, size_t cap)
+{
+  resize (c, sentences, cap);
+  return 0;
+}
+
+int
 corpus_grow (struct corpus *c, size_t w, size_t s)
 {
-  resize (c, words, sizepow2 (w));
-  resize (c, sentences, sizepow2 (s));
-  corpus_rebuild (c);
+  int r = 0;
+  r |= resize_sentences (c, sizepow2 (s));
+  r |= resize_words (c, sizepow2 (w));
+  return r;
 }
 
-static void
-resize_words (struct corpus *c)
-{
-  resize (c, words, c->words.cap << 2);
-  corpus_rebuild (c);
-}
-
-static void
-resize_sentences (struct corpus *c)
-{
-  resize (c, sentences, c->sentences.cap << 2);
-}
-
-static void
+static int
 add_sentence (struct corpus *c, char *s)
 {
   size_t n = 0;
@@ -109,18 +115,24 @@ add_sentence (struct corpus *c, char *s)
   else {
     c->sentences.ptr[c->sentences.len - 1]->len = n;
   }
+  return 0;
 }
 
-void
+int
 corpus_parse (struct corpus *c, const char *path)
 {
   struct scanner *s;
   char b[8192] = { 0 };
 
   s = scanner_new (path);
+  if (s == NULL)
+    return -1;
+
   while (scanner_readline (s, b, sizeof (b)) >= 0) {
     if (*b)
-      add_sentence (c, filter (b));
+      if (add_sentence (c, filter (b)) != 0)
+        return -1;
   }
   scanner_free (s);
+  return 0;
 }
