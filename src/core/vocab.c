@@ -286,7 +286,7 @@ vocab_encode (struct vocab *v)
     count[v->len + a] = count[m1] + count[m2];
     parent[m1] = (uint32_t) v->len + a;
     parent[m2] = (uint32_t) v->len + a;
-    binary[m2 / 32] |= 1 << (m2 % 32);
+    binary[m2 / 32] |= 1u << (m2 % 32);
   }
 
   entry = v->pool;
