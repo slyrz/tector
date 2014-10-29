@@ -15,7 +15,7 @@ struct vocab_entry {
   uint32_t hash;
   uint32_t count;
   uint64_t code;
-  uint32_t point[MAX_CODE_LENGTH];
+  int32_t point[MAX_CODE_LENGTH];
   char data[MAX_WORD_LENGTH];
 };
 

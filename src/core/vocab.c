@@ -13,8 +13,9 @@
 #include <string.h>
 
 static inline uint32_t
-hash (const unsigned char *restrict w)
+hash (const char *restrict s)
 {
+  const unsigned char *w = (const unsigned char *) s;
   uint32_t h = 0x811c9dc5;
   while (*w)
     h = (h ^ *w++) * 0x1000193;
@@ -199,7 +200,7 @@ vocab_get_index (struct vocab *v, const char *w, size_t * i)
   entry = vocab_get (v, w);
   if (entry == NULL)
     return -1;
-  *i = entry - v->pool;
+  *i = (size_t) (entry - v->pool);
   return 0;
 }
 
@@ -208,25 +209,28 @@ vocab_encode (struct vocab *v)
 {
   struct vocab_entry *entry;
 
-  long long point[MAX_CODE_LENGTH];
-  long long code;
+  int32_t point[MAX_CODE_LENGTH];
+  uint64_t code;
 
-  size_t a, b, i;
-  long long m1, m2;
-  long long p1, p2;
+  uint32_t a, b, i;
+  uint32_t m1, m2;
+  int64_t p1, p2;
 
-  long long *count;
-  long long *binary;
-  long long *parent;
+  uint32_t *count;
+  uint32_t *binary;
+  uint32_t *parent;
 
   int r = 0;
 
   if (v->len == 0)
     return 0;
 
-  count = calloc (v->len * 2 + 1, sizeof (long long));
-  binary = calloc (v->len * 2 + 1, sizeof (long long));
-  parent = calloc (v->len * 2 + 1, sizeof (long long));
+  if (v->len > INT32_MAX)
+    return -1;
+
+  count = calloc (v->len * 2 + 1, sizeof (uint32_t));
+  binary = calloc (v->len / 16 + 1, sizeof (uint32_t));
+  parent = calloc (v->len * 2 + 1, sizeof (uint32_t));
 
   r |= (count == NULL);
   r |= (binary == NULL);
@@ -237,64 +241,62 @@ vocab_encode (struct vocab *v)
   for (a = 0; a < v->len; a++)
     count[a] = v->pool[a].count;
 
-  for (a = v->len; a < v->len * 2; a++)
-    count[a] = 1e15;
+  for (; a < v->len * 2; a++)
+    count[a] = 0x10000000;
 
-  p1 = v->len - 1;
-  p2 = v->len;
+  p1 = (int64_t) v->len - 1;
+  p2 = (int64_t) v->len;
   for (a = 0; a < v->len - 1; a++) {
     if (p1 >= 0) {
       if (count[p1] < count[p2]) {
-        m1 = p1;
+        m1 = (uint32_t) p1;
         p1--;
       }
       else {
-        m1 = p2;
+        m1 = (uint32_t) p2;
         p2++;
       }
     }
     else {
-      m1 = p2;
+      m1 = (uint32_t) p2;
       p2++;
     }
     if (p1 >= 0) {
       if (count[p1] < count[p2]) {
-        m2 = p1;
+        m2 = (uint32_t) p1;
         p1--;
       }
       else {
-        m2 = p2;
+        m2 = (uint32_t) p2;
         p2++;
       }
     }
     else {
-      m2 = p2;
+      m2 = (uint32_t) p2;
       p2++;
     }
     count[v->len + a] = count[m1] + count[m2];
-    parent[m1] = v->len + a;
-    parent[m2] = v->len + a;
-    binary[m2] = 1;
+    parent[m1] = (uint32_t) v->len + a;
+    parent[m2] = (uint32_t) v->len + a;
+    binary[m2 / 32] |= 1 << (m2 % 32);
   }
 
   entry = v->pool;
   for (a = 0; a < v->len; a++) {
-    code = 0ll;
+    code = 0;
     for (b = a, i = 0; b != (v->len * 2 - 2); b = parent[b], i++) {
-      code |= binary[b] << i;
-      point[i] = b;
+      code |= ((binary[b / 32] >> (b % 32)) & 1) << i;
+      point[i] = (int32_t) b;
     }
-
-    entry->point[0] = v->len - 2;
-    entry->code = 0ll;
+    entry->point[0] = (int32_t) v->len - 2;
+    entry->code = 0;
     for (b = 0; b < i; b++) {
       entry->code |= (code & 1) << (i - b - 1);
-      entry->point[i - b] = point[b] - v->len;
+      entry->point[i - b] = point[b] - (int32_t) v->len;
       code >>= 1;
     }
     entry++;
   }
-
 cleanup:
   free (count);
   free (binary);
