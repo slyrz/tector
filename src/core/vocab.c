@@ -89,12 +89,21 @@ vocab_rebuild (struct vocab *v)
   return 0;
 }
 
+static int
+tainted_size (size_t cap)
+{
+  return (cap > limitof (struct vocab_entry));
+}
+
 int
 vocab_grow (struct vocab *v, size_t cap)
 {
   cap = sizepow2 (cap);
   if (cap < v->cap)
     return 0;
+
+  if (tainted_size (cap))
+    return -1;
 
   v->cap = cap;
   v->pool = reallocarray (v->pool, v->cap, sizeof (struct vocab_entry));
@@ -103,7 +112,6 @@ vocab_grow (struct vocab *v, size_t cap)
   v->table = reallocarray (v->table, v->cap, sizeof (struct vocab_entry *));
   if (v->table == NULL)
     return -1;
-
   clearspace (v->pool, v->len, v->cap, sizeof (struct vocab_entry));
   if (vocab_rebuild (v) != 0)
     return -1;

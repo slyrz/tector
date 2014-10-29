@@ -74,7 +74,8 @@ error:
 void
 scanner_free (struct scanner *s)
 {
-  close (s->fd);
+  if (s->fd >= 0)
+    close (s->fd);
   free (s);
 }
 

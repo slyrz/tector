@@ -7,6 +7,9 @@
 #include "vocab.h"
 #include "corpus.h"
 
+#define MAX_WINDOW	50
+#define MAX_LAYERS	10000
+
 struct neural_network {
   const struct vocab *restrict v;
   const struct corpus *restrict c;

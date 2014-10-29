@@ -2,6 +2,15 @@
 #define CORE_MEM_H
 
 #include <stdlib.h>
+#include <stdint.h>
+
+#define MEM_LIMIT	SIZE_MAX
+
+#define limitof(s) \
+  (limitofsize (sizeof (s)))
+
+#define limitofsize(s) \
+  (SIZE_MAX / (s))
 
 #define freenull(p) \
   do { \

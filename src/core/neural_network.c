@@ -9,6 +9,7 @@
 #include "mem.h"
 
 #include <string.h>
+#include <stdint.h>
 
 #define entry(v,s,i,j) \
   ((v)->pool[(s)[i]->words[j]])
@@ -54,21 +55,36 @@ neural_network_free (struct neural_network *n)
   free (n);
 }
 
+static int
+tainted_size (size_t vocab, size_t layers, size_t window)
+{
+  if (window > MAX_WINDOW)
+    return 1;
+  if (layers > MAX_LAYERS)
+    return 1;
+  if (vocab > limitofsize (layers * window * sizeof (float)))
+    return 1;
+  return 0;
+}
+
 int
 neural_network_alloc (struct neural_network *n)
 {
-  const size_t cap = n->size.vocab * n->size.layer;
+  const size_t s = n->size.vocab * n->size.layer;
+
+  if (tainted_size (n->size.vocab, n->size.layer, n->size.window))
+    return -1;
 
   freenull (n->syn0);
   freenull (n->syn1);
 
-  if (posix_memalign ((void **) &n->syn0, 128, cap * sizeof (float)))
+  if (posix_memalign ((void **) &n->syn0, 128, s * sizeof (float)))
     goto error;
-  if (posix_memalign ((void **) &n->syn1, 128, cap * sizeof (float)))
+  if (posix_memalign ((void **) &n->syn1, 128, s * sizeof (float)))
     goto error;
 
-  clearspace (n->syn0, 0, sizeof (float), cap);
-  clearspace (n->syn1, 0, sizeof (float), cap);
+  clearspace (n->syn0, 0, sizeof (float), s);
+  clearspace (n->syn1, 0, sizeof (float), s);
   return 0;
 error:
   freenull (n->syn0);

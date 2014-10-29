@@ -24,7 +24,8 @@ vocab_load (struct vocab *v, const char *path)
     return -1;
   if (check (read, fd, &v->len, sizeof (size_t)) != 0)
     goto error;
-  vocab_grow (v, v->len);
+  if (vocab_grow (v, v->len) != 0)
+    goto error;
   if (check (read, fd, v->pool, v->len * sizeof (struct vocab_entry)) != 0)
     goto error;
   close (fd);
@@ -68,7 +69,8 @@ corpus_load (struct corpus *c, const char *path)
     goto error;
   if (check (read, fd, &c->sentences.len, sizeof (size_t)) != 0)
     goto error;
-  corpus_grow (c, c->words.len, c->sentences.len);
+  if (corpus_grow (c, c->words.len, c->sentences.len) != 0)
+    goto error;
   if (check (read, fd, c->words.ptr, c->words.len * sizeof (size_t)) != 0)
     goto error;
   close (fd);

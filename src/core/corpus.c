@@ -83,12 +83,29 @@ resize_sentences (struct corpus *c, size_t cap)
   return 0;
 }
 
-int
-corpus_grow (struct corpus *c, size_t w, size_t s)
+static int
+tainted_size (size_t words, size_t sentences)
 {
+  return (words > limitof (size_t)) || (sentences > limitof (struct sentence *));
+}
+
+int
+corpus_grow (struct corpus *c, size_t words, size_t sentences)
+{
+  const size_t s = sizepow2 (sentences);
+  const size_t w = sizepow2 (words);
   int r = 0;
-  r |= resize_sentences (c, sizepow2 (s));
-  r |= resize_words (c, sizepow2 (w));
+
+  if ((s < sentences) || (w < words))
+    return -1;
+
+  if (tainted_size (w, s))
+    return -1;
+
+  if (s > c->sentences.cap)
+    r |= resize_sentences (c, s);
+  if (w > c->words.cap)
+    r |= resize_words (c, w);
   return r;
 }
 
