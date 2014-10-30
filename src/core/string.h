@@ -14,7 +14,7 @@ char uppercase (int c);
 
 int ordalpha (int c);
 
-void nullterm (char *s, size_t l);
-void formatsize (char *s, size_t v);
+char *nullterm (char *s, size_t l);
+char *formatsize (char *s, size_t v);
 
 #endif

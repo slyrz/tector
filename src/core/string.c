@@ -56,12 +56,13 @@ ordalpha (int c)
   return 0;
 }
 
-void
+char *
 nullterm (char *s, size_t l)
 {
   if ((l > 0) && (s[l - 1] == ' '))
     l--;
   s[l] = '\0';
+  return s;
 }
 
 static inline int
@@ -79,10 +80,11 @@ log1024 (unsigned long v)
   return e;
 }
 
-void
+char *
 formatsize (char *s, size_t v)
 {
   const int w = log1024 (v);
   const size_t x = v >> (w * 10);
   sprintf (s, "%zu %sB", x, &"\0\0K\0M\0G\0T\0"[w << 1]);
+  return s;
 }
