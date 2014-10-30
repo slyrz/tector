@@ -1,17 +1,11 @@
-#include <malloc.h>
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <assert.h>
 
-#include "core/filter.h"
-#include "core/scanner.h"
-#include "core/vocab.h"
 #include "core/corpus.h"
-#include "core/neural_network.h"
+#include "core/filter.h"
 #include "core/log.h"
+#include "core/neural_network.h"
+#include "core/vocab.h"
 
 const size_t dimensionality = 50;
 const size_t window = 5;
