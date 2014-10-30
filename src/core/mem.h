@@ -12,13 +12,17 @@
 #define limitofsize(s) \
   (SIZE_MAX / (s))
 
-#define freenull(p) \
+#define mem_freenull(p) \
   do { \
-    free (p); p = NULL; \
+    mem_free (p); p = NULL; \
   } while (0)
 
 size_t sizepow2 (size_t n);
-void *reallocarray (void *ptr, size_t nmemb, size_t size);
-void *clearspace (void *ptr, size_t nmemb, size_t cap, size_t size);
+
+void *mem_alloc (size_t nmemb, size_t size);
+void *mem_align (size_t nmemb, size_t size, size_t alignment);
+void *mem_realloc (void *ptr, size_t nmemb, size_t size);
+void mem_free (void *ptr);
+void mem_clear (void *ptr, size_t nmemb, size_t size);
 
 #endif

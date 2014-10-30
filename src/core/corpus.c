@@ -11,7 +11,7 @@
     if ((s) < (c)->f.cap) \
       return -1; \
     (c)->f.cap = (s); \
-    (c)->f.ptr = reallocarray ((c)->f.ptr, (c)->f.cap, sizeof ((c)->f.ptr[0])); \
+    (c)->f.ptr = mem_realloc ((c)->f.ptr, (c)->f.cap, sizeof ((c)->f.ptr[0])); \
     if ((c)->f.ptr == NULL) \
       return -1; \
   } while (0)
@@ -29,16 +29,16 @@ corpus_new (struct vocab *v)
 {
   struct corpus *c;
 
-  c = calloc (1, sizeof (struct corpus));
+  c = mem_alloc (1, sizeof (struct corpus));
   if (c == NULL)
     goto error;
   c->vocab = v;
   c->words.cap = 32768;
-  c->words.ptr = calloc (c->words.cap, sizeof (size_t));
+  c->words.ptr = mem_alloc (c->words.cap, sizeof (size_t));
   if (c->words.ptr == NULL)
     goto error;
   c->sentences.cap = 1024;
-  c->sentences.ptr = calloc (c->sentences.cap, sizeof (struct sentence *));
+  c->sentences.ptr = mem_alloc (c->sentences.cap, sizeof (struct sentence *));
   if (c->sentences.ptr == NULL)
     goto error;
   return c;
@@ -51,9 +51,9 @@ error:
 void
 corpus_free (struct corpus *c)
 {
-  free (c->sentences.ptr);
-  free (c->words.ptr);
-  free (c);
+  mem_free (c->sentences.ptr);
+  mem_free (c->words.ptr);
+  mem_free (c);
 }
 
 int

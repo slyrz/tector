@@ -24,7 +24,7 @@ neural_network_new (struct vocab *v, size_t layer, size_t window)
   size_t a;
   size_t b;
 
-  n = calloc (1, sizeof (struct neural_network));
+  n = mem_alloc (1, sizeof (struct neural_network));
   if (n == NULL)
     return NULL;
 
@@ -50,9 +50,9 @@ error:
 void
 neural_network_free (struct neural_network *n)
 {
-  free (n->syn0);
-  free (n->syn1);
-  free (n);
+  mem_free (n->syn0);
+  mem_free (n->syn1);
+  mem_free (n);
 }
 
 static int
@@ -75,20 +75,20 @@ neural_network_alloc (struct neural_network *n)
   if (tainted_size (n->size.vocab, n->size.layer, n->size.window))
     return -1;
 
-  freenull (n->syn0);
-  freenull (n->syn1);
+  mem_free (n->syn0);
+  mem_free (n->syn1);
 
-  if (posix_memalign ((void **) &n->syn0, 128, s * sizeof (float)))
-    goto error;
-  if (posix_memalign ((void **) &n->syn1, 128, s * sizeof (float)))
+  n->syn0 = mem_align (s, sizeof (float), 128);
+  n->syn1 = mem_align (s, sizeof (float), 128);
+  if ((n->syn0 == NULL) || (n->syn1 == NULL))
     goto error;
 
-  clearspace (n->syn0, 0, sizeof (float), s);
-  clearspace (n->syn1, 0, sizeof (float), s);
+  mem_clear (n->syn0, s, sizeof (float));
+  mem_clear (n->syn1, s, sizeof (float));
   return 0;
 error:
-  freenull (n->syn0);
-  freenull (n->syn1);
+  mem_freenull (n->syn0);
+  mem_freenull (n->syn1);
   return -1;
 }
 
@@ -117,8 +117,8 @@ worker (struct neural_network *restrict n, struct sentence **restrict s, size_t 
 
   unsigned short rnd[3] = { 1, 2, 3 };
 
-  neu1 = calloc (sl, sizeof (float));
-  neu2 = calloc (sl, sizeof (float));
+  neu1 = mem_alloc (sl, sizeof (float));
+  neu2 = mem_alloc (sl, sizeof (float));
 
   for (i = 0; i < k; i++) {
     // TODO: adjust alpha
@@ -172,12 +172,12 @@ worker (struct neural_network *restrict n, struct sentence **restrict s, size_t 
             n->syn0[c + x] += neu2[c];
         }
       }
-      memset (neu1, 0, sl * sizeof (float));
-      memset (neu2, 0, sl * sizeof (float));
+      mem_clear (neu1, sl, sizeof (float));
+      mem_clear (neu2, sl, sizeof (float));
     }
   }
-  free (neu1);
-  free (neu2);
+  mem_free (neu1);
+  mem_free (neu2);
 }
 
 int

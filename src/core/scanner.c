@@ -1,6 +1,7 @@
 #include "config.h"
 #include "scanner.h"
 #include "string.h"
+#include "mem.h"
 
 #include <fcntl.h>
 #include <sys/types.h>
@@ -58,7 +59,7 @@ scanner_new (const char *path)
 {
   struct scanner *s;
 
-  s = calloc (sizeof (struct scanner), 1);
+  s = mem_alloc (sizeof (struct scanner), 1);
   if (s == NULL)
     goto error;
   s->fd = open (path, O_RDONLY);
@@ -76,7 +77,7 @@ scanner_free (struct scanner *s)
 {
   if (s->fd >= 0)
     close (s->fd);
-  free (s);
+  mem_free (s);
 }
 
 int

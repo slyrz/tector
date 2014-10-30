@@ -1,7 +1,12 @@
 #include "mem.h"
+#include "log.h"
 
 #include <stdint.h>
 #include <string.h>
+#include <malloc.h>
+
+static size_t used = 0;
+static size_t objects = 0;
 
 size_t
 sizepow2 (size_t n)
@@ -19,22 +24,86 @@ sizepow2 (size_t n)
 }
 
 static inline int
-overflow (size_t n, size_t s)
+valid (size_t n, size_t s)
 {
-  const size_t t = 1ul << (sizeof (size_t) * 4);
-  return (((n >= t) || (s >= t)) && (n > 0) && ((SIZE_MAX / n) < s));
+  const size_t t = 1u << (sizeof (size_t) * 4);
+
+  if ((n == 0) || (s == 0))
+    return 0;
+  if ((n >= t) || (s >= t))
+    return ((SIZE_MAX / s) >= n);
+  return 1;
+}
+
+enum mode {
+  ADD,
+  SUB,
+};
+
+static void
+bookkeep (int mode, void *ptr)
+{
+  const size_t size = malloc_usable_size (ptr);
+
+  switch (mode) {
+  case ADD:
+    used += size;
+    objects += !!size;
+    break;
+  case SUB:
+    used -= size;
+    objects -= !!size;
+    break;
+  }
+  if (objects)
+    debug ("using %zu object%s, %zu bytes", objects, "s" + (objects == 1), used);
+  else
+    debug ("all memory freed");
 }
 
 void *
-reallocarray (void *ptr, size_t len, size_t size)
+mem_alloc (size_t nmemb, size_t size)
 {
-  if (overflow (len, size) || (len == 0) || (size == 0))
-    return NULL;
-  return realloc (ptr, size * len);
+  void *ptr = NULL;
+
+  if (valid (nmemb, size))
+    if (ptr = calloc (nmemb, size), ptr != NULL)
+      bookkeep (ADD, ptr);
+  return ptr;
 }
 
 void *
-clearspace (void *ptr, size_t len, size_t cap, size_t size)
+mem_align (size_t nmemb, size_t size, size_t alignment)
 {
-  return memset ((char *) ptr + (len * size), 0, (cap - len) * size);
+  void *ptr = NULL;
+
+  if (valid (nmemb, size))
+    if (posix_memalign (&ptr, alignment, nmemb * size) == 0)
+      bookkeep (ADD, ptr);
+  return ptr;
+}
+
+void *
+mem_realloc (void *ptr, size_t nmemb, size_t size)
+{
+  if (valid (nmemb, size)) {
+    bookkeep (SUB, ptr);
+    if (ptr = realloc (ptr, nmemb * size), ptr != NULL)
+      bookkeep (ADD, ptr);
+    return ptr;
+  }
+  return NULL;
+}
+
+void
+mem_free (void *ptr)
+{
+  bookkeep (SUB, ptr);
+  free (ptr);
+}
+
+void
+mem_clear (void *ptr, size_t nmemb, size_t size)
+{
+  memset (ptr, 0, nmemb * size);
 }

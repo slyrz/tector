@@ -27,15 +27,15 @@ vocab_new (void)
 {
   struct vocab *v;
 
-  v = calloc (1, sizeof (struct vocab));
+  v = mem_alloc (1, sizeof (struct vocab));
   if (v == NULL)
     goto error;
   v->len = 0;
   v->cap = 32768;
-  v->pool = calloc (v->cap, sizeof (struct vocab_entry));
+  v->pool = mem_alloc (v->cap, sizeof (struct vocab_entry));
   if (v->pool == NULL)
     goto error;
-  v->table = calloc (v->cap, sizeof (struct vocab_entry *));
+  v->table = mem_alloc (v->cap, sizeof (struct vocab_entry *));
   if (v->table == NULL)
     goto error;
   return v;
@@ -59,9 +59,9 @@ vocab_new_from_path (const char *path)
 void
 vocab_free (struct vocab *v)
 {
-  free (v->pool);
-  free (v->table);
-  free (v);
+  mem_free (v->pool);
+  mem_free (v->table);
+  mem_free (v);
 }
 
 static inline float
@@ -76,7 +76,7 @@ vocab_rebuild (struct vocab *v)
   size_t i;
   size_t j;
 
-  clearspace (v->table, 0, v->cap, sizeof (struct vocab_entry *));
+  mem_clear (v->table, v->cap, sizeof (struct vocab_entry *));
   for (i = 0; i < v->len; i++) {
     j = v->pool[i].hash;
     for (;;) {
@@ -106,13 +106,13 @@ vocab_grow (struct vocab *v, size_t cap)
     return -1;
 
   v->cap = cap;
-  v->pool = reallocarray (v->pool, v->cap, sizeof (struct vocab_entry));
+  v->pool = mem_realloc (v->pool, v->cap, sizeof (struct vocab_entry));
   if (v->pool == NULL)
     return -1;
-  v->table = reallocarray (v->table, v->cap, sizeof (struct vocab_entry *));
+  v->table = mem_realloc (v->table, v->cap, sizeof (struct vocab_entry *));
   if (v->table == NULL)
     return -1;
-  clearspace (v->pool, v->len, v->cap, sizeof (struct vocab_entry));
+  mem_clear (v->pool + v->len, v->cap - v->len, sizeof (struct vocab_entry));
   if (vocab_rebuild (v) != 0)
     return -1;
   return 0;
@@ -236,9 +236,9 @@ vocab_encode (struct vocab *v)
   if (v->len > INT32_MAX)
     return -1;
 
-  count = calloc (v->len * 2 + 1, sizeof (uint32_t));
-  binary = calloc (v->len / 16 + 1, sizeof (uint32_t));
-  parent = calloc (v->len * 2 + 1, sizeof (uint32_t));
+  count = mem_alloc (v->len * 2 + 1, sizeof (uint32_t));
+  binary = mem_alloc (v->len / 16 + 1, sizeof (uint32_t));
+  parent = mem_alloc (v->len * 2 + 1, sizeof (uint32_t));
 
   r |= (count == NULL);
   r |= (binary == NULL);
@@ -306,8 +306,8 @@ vocab_encode (struct vocab *v)
     entry++;
   }
 cleanup:
-  free (count);
-  free (binary);
-  free (parent);
+  mem_free (count);
+  mem_free (binary);
+  mem_free (parent);
   return -r;
 }
