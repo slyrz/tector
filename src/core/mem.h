@@ -4,14 +4,6 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#define MEM_LIMIT	SIZE_MAX
-
-#define limitof(s) \
-  (limitofsize (sizeof (s)))
-
-#define limitofsize(s) \
-  (SIZE_MAX / (s))
-
 #define mem_freenull(p) \
   do { \
     mem_free (p); p = NULL; \
