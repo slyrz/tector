@@ -1,5 +1,6 @@
 #include "mem.h"
 #include "log.h"
+#include "string.h"
 
 #include <stdint.h>
 #include <string.h>
@@ -23,16 +24,15 @@ sizepow2 (size_t n)
   return (r > n) ? r : n;
 }
 
-static inline int
-valid (size_t n, size_t s)
+static void
+logusage (void)
 {
-  const size_t t = 1ul << (sizeof (size_t) * 4);
+  char size[32];
 
-  if ((n == 0) || (s == 0))
-    return 0;
-  if ((n >= t) || (s >= t))
-    return ((SIZE_MAX / s) >= n);
-  return 1;
+  if (objects)
+    debug ("%zu object%s using %s memory", objects, &"s"[objects == 1], formatsize (size, used));
+  else
+    debug ("all memory freed");
 }
 
 enum mode {
@@ -55,10 +55,19 @@ bookkeep (int mode, void *ptr)
       objects -= !!size;
       break;
   }
-  if (objects)
-    debug ("using %zu object%s, %zu bytes", objects, "s" + (objects == 1), used);
-  else
-    debug ("all memory freed");
+  logusage ();
+}
+
+static inline int
+valid (size_t n, size_t s)
+{
+  const size_t t = 1ul << (sizeof (size_t) * 4);
+
+  if ((n == 0) || (s == 0))
+    return 0;
+  if ((n >= t) || (s >= t))
+    return ((SIZE_MAX / s) >= n);
+  return 1;
 }
 
 void *
