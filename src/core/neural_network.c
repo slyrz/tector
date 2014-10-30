@@ -55,24 +55,12 @@ neural_network_free (struct neural_network *n)
   mem_free (n);
 }
 
-static int
-tainted_size (size_t vocab, size_t layers, size_t window)
-{
-  if (window > MAX_WINDOW)
-    return 1;
-  if (layers > MAX_LAYERS)
-    return 1;
-  if (vocab > limitofsize (layers * window * sizeof (float)))
-    return 1;
-  return 0;
-}
-
 int
 neural_network_alloc (struct neural_network *n)
 {
   const size_t s = n->size.vocab * n->size.layer;
 
-  if (tainted_size (n->size.vocab, n->size.layer, n->size.window))
+  if ((n->size.window > MAX_WINDOW) || (n->size.layer > MAX_LAYERS))
     return -1;
 
   mem_free (n->syn0);
