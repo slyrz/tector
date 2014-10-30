@@ -26,7 +26,7 @@ sizepow2 (size_t n)
 static inline int
 valid (size_t n, size_t s)
 {
-  const size_t t = 1u << (sizeof (size_t) * 4);
+  const size_t t = 1ul << (sizeof (size_t) * 4);
 
   if ((n == 0) || (s == 0))
     return 0;
@@ -46,14 +46,14 @@ bookkeep (int mode, void *ptr)
   const size_t size = malloc_usable_size (ptr);
 
   switch (mode) {
-  case ADD:
-    used += size;
-    objects += !!size;
-    break;
-  case SUB:
-    used -= size;
-    objects -= !!size;
-    break;
+    case ADD:
+      used += size;
+      objects += !!size;
+      break;
+    case SUB:
+      used -= size;
+      objects -= !!size;
+      break;
   }
   if (objects)
     debug ("using %zu object%s, %zu bytes", objects, "s" + (objects == 1), used);
