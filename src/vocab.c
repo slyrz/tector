@@ -52,9 +52,9 @@ main (int argc, char **argv)
     learn_file (v, argv[i]);
   }
 
-  debug ("vocab contains %zu words", v->len);
+  info ("vocab contains %zu words", v->len);
   vocab_shrink (v);
-  debug ("vocab shrinked to %zu words", v->len);
+  info ("vocab shrinked to %zu words", v->len);
 
   vocab_encode (v);
   vocab_save (v, "vocab.bin");
