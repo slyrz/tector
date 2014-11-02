@@ -4,9 +4,9 @@
 #include <stdlib.h>
 
 struct command {
-	const char *name;
-	const char *args;
-	const char *opts;
+  const char *name;
+  const char *args;
+  const char *opts;
 };
 
 void options_parse (int argc, char **argv);

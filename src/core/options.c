@@ -43,7 +43,7 @@ idx (int c)
   return ((ordalpha (c) - 1) & 31);
 }
 
-static const char*
+static const char *
 val (int c)
 {
   return values[idx (c)];
@@ -116,7 +116,7 @@ options_parse (int argc, char **argv)
     b |= 1u << idx (*optstring);
     optstring++;
   }
-  b &= ~(1u << idx('h'));
+  b &= ~(1u << idx ('h'));
   b &= ~(1u << 31);
 
   while (b) {
@@ -161,8 +161,7 @@ options_get_size_t (char c, size_t *r)
   if (val (c) == NULL)
     return;
   errno = 0;
-  v = strtoul(val (c), &e, 10);
+  v = strtoul (val (c), &e, 10);
   if ((errno == 0) && (*e == '\0') && (v <= SIZE_MAX))
     *r = (size_t) v;
 }
-
