@@ -166,9 +166,11 @@ vocab_add (struct vocab *v, const char *w)
     return 0;
   }
 
-  if (load_factor (v) > 0.7f)
+  if (load_factor (v) > 0.7f) {
     if (vocab_grow (v, v->cap << 2) != 0)
       return -1;
+    i = find (v, h, w);
+  }
 
   entry = v->pool + v->len;
   entry->hash = h;
