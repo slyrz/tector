@@ -115,7 +115,7 @@ worker (struct neural_network *restrict n, struct sentence **restrict s, size_t 
       b = (long long) nrand48 (rnd) % sw;
       d = 0;
       // in -> hidden
-      for (a = b; a < (long long) sw * 2ll + 1ll - b; a++) {
+      for (a = b; a < (long long) sw * 2 + 1 - b; a++) {
         if (a == sw)
           continue;
         c = j + a - sw;
@@ -135,7 +135,7 @@ worker (struct neural_network *restrict n, struct sentence **restrict s, size_t 
       point = entry (n->v, s, i, j).point;
       while (code) {
         e = point[0] * sl;
-        f = 0;
+        f = 0.0f;
         for (c = 0; c < sl; c++)
           f += neu1[c] * n->syn1[c + e];
         f = expf (f);
