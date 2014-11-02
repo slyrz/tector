@@ -14,7 +14,7 @@
 #define entry(v,s,i,j) \
   ((v)->pool[(s)[i]->words[j]])
 
-#define inrange(v,i,j) (long long) \
+#define inrange(v,i,j) \
   (((v) >= (i)) && ((v) < (j)))
 
 struct neural_network *
@@ -85,8 +85,8 @@ worker (struct neural_network *restrict n, struct sentence **restrict s, size_t 
 {
   const float alpha = 0.025f;
 
-  const size_t sw = n->size.window;
-  const size_t sl = n->size.layer;
+  const long long sw = (long long) n->size.window;
+  const long long sl = (long long) n->size.layer;
 
   long long a, b, c, d, e;
 
@@ -94,33 +94,33 @@ worker (struct neural_network *restrict n, struct sentence **restrict s, size_t 
   float g;
 
   uint64_t code;
-  uint32_t *point;
+  int32_t *point;
 
-  size_t i;
-  size_t j;
-  size_t x;
+  long long i;
+  long long j;
+  long long x;
 
-  float *restrict neu1;
-  float *restrict neu2;
+  float *neu1;
+  float *neu2;
 
   unsigned short rnd[3] = { 1, 2, 3 };
 
-  neu1 = mem_alloc (sl, sizeof (float));
-  neu2 = mem_alloc (sl, sizeof (float));
+  neu1 = mem_alloc ((size_t) sl, sizeof (float));
+  neu2 = mem_alloc ((size_t) sl, sizeof (float));
 
-  for (i = 0; i < k; i++) {
+  for (i = 0; i < (long long) k; i++) {
     // TODO: adjust alpha
     // cbow
-    for (j = 0; j < s[i]->len; j++) {
+    for (j = 0; j < (long long) s[i]->len; j++) {
       b = (long long) nrand48 (rnd) % sw;
       d = 0;
       // in -> hidden
-      for (a = b; a < sw * 2 + 1 - b; a++) {
+      for (a = b; a < (long long) sw * 2ll + 1ll - b; a++) {
         if (a == sw)
           continue;
         c = j + a - sw;
         if (inrange (c, 0, (long long) s[i]->len)) {
-          x = s[i]->words[c] * sl;
+          x = (long long) s[i]->words[c] * sl;
           for (c = 0; c < sl; c++)
             neu1[c] += n->syn0[x + c];
           d++;
@@ -155,13 +155,13 @@ worker (struct neural_network *restrict n, struct sentence **restrict s, size_t 
           continue;
         c = j + a - sw;
         if (inrange (c, 0, (long long) s[i]->len)) {
-          x = s[i]->words[c] * sl;
+          x = (long long) s[i]->words[c] * sl;
           for (c = 0; c < sl; c++)
             n->syn0[c + x] += neu2[c];
         }
       }
-      mem_clear (neu1, sl, sizeof (float));
-      mem_clear (neu2, sl, sizeof (float));
+      mem_clear (neu1, (size_t) sl, sizeof (float));
+      mem_clear (neu2, (size_t) sl, sizeof (float));
     }
   }
   mem_free (neu1);
