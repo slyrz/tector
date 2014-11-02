@@ -76,7 +76,6 @@ log1024 (unsigned long v)
   e += (v >= 1024);
   v /= 1024;
   e += (v >= 1024);
-  v /= 1024;
   return e;
 }
 
