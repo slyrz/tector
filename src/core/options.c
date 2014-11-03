@@ -92,7 +92,7 @@ append (char *shortopts, struct option *longopts, const struct option *src)
   *shortopts = '\0';
 }
 
-void
+char **
 options_parse (int argc, char **argv)
 {
   const char *optstring = command.opts;
@@ -142,6 +142,8 @@ options_parse (int argc, char **argv)
 
   if (c > 0)
     print_usage_and_exit (longopts);
+
+  return argv + optind;
 }
 
 void
