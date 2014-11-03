@@ -155,6 +155,12 @@ options_get_str (char c, const char **r)
 }
 
 void
+options_get_bool (char c, int *r)
+{
+  *r = (val (c) != NULL);
+}
+
+void
 options_get_size_t (char c, size_t *r)
 {
   char *e;
