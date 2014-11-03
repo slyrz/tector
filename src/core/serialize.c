@@ -24,12 +24,13 @@ vocab_load (struct vocab *v, const char *path)
     return -1;
   if (check (read, fd, &v->len, sizeof (size_t)) != 0)
     goto error;
-  if (vocab_grow (v, v->len) != 0)
+  if (vocab_alloc (v) != 0)
     goto error;
   if (check (read, fd, v->pool, v->len * sizeof (struct vocab_entry)) != 0)
     goto error;
+  if (vocab_build (v) != 0)
+    goto error;
   close (fd);
-  vocab_rebuild (v);
   return 0;
 error:
   if (fd >= 0)
@@ -69,12 +70,13 @@ corpus_load (struct corpus *c, const char *path)
     goto error;
   if (check (read, fd, &c->sentences.len, sizeof (size_t)) != 0)
     goto error;
-  if (corpus_grow (c, c->words.len, c->sentences.len) != 0)
+  if (corpus_alloc (c) != 0)
     goto error;
   if (check (read, fd, c->words.ptr, c->words.len * sizeof (size_t)) != 0)
     goto error;
+  if (corpus_build (c) != 0)
+    goto error;
   close (fd);
-  corpus_rebuild (c);
   return 0;
 error:
   if (fd >= 0)

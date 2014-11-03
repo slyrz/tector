@@ -9,7 +9,7 @@
 static size_t used = 0;
 static size_t objects = 0;
 
-size_t
+static size_t
 sizepow2 (size_t n)
 {
   size_t r = n;
@@ -22,6 +22,16 @@ sizepow2 (size_t n)
   r |= r >> 16;
   r++;
   return (r > n) ? r : n;
+}
+
+size_t
+reqcap (size_t len, size_t cap, size_t min)
+{
+  if (cap < min)
+    cap = min;
+  if (cap < len)
+    cap = sizepow2 (len) << 2;
+  return cap;
 }
 
 static void
@@ -95,6 +105,13 @@ mem_align (size_t nmemb, size_t size, size_t alignment)
 void *
 mem_realloc (void *ptr, size_t nmemb, size_t size)
 {
+  /**
+   * Passing NULL to realloc would work as well but doesn't initialize memory
+   * so we just use calloc-based mem_alloc function instead.
+   */
+  if (ptr == NULL)
+    return mem_alloc (nmemb, size);
+
   if (valid (nmemb, size)) {
     bookkeep (SUB, ptr);
     if (ptr = realloc (ptr, nmemb * size), ptr != NULL)

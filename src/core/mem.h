@@ -9,7 +9,7 @@
     mem_free (p); p = NULL; \
   } while (0)
 
-size_t sizepow2 (size_t n);
+size_t reqcap (size_t len, size_t cap, size_t min);
 
 void *mem_alloc (size_t nmemb, size_t size);
 void *mem_align (size_t nmemb, size_t size, size_t alignment);

@@ -33,13 +33,7 @@ corpus_new (struct vocab *v)
   if (c == NULL)
     goto error;
   c->vocab = v;
-  c->words.cap = 32768;
-  c->words.ptr = mem_alloc (c->words.cap, sizeof (size_t));
-  if (c->words.ptr == NULL)
-    goto error;
-  c->sentences.cap = 1024;
-  c->sentences.ptr = mem_alloc (c->sentences.cap, sizeof (struct sentence *));
-  if (c->sentences.ptr == NULL)
+  if (corpus_alloc (c) != 0)
     goto error;
   return c;
 error:
@@ -57,7 +51,7 @@ corpus_free (struct corpus *c)
 }
 
 int
-corpus_rebuild (struct corpus *c)
+corpus_build (struct corpus *c)
 {
   size_t i;
   size_t j;
@@ -67,11 +61,22 @@ corpus_rebuild (struct corpus *c)
   return 0;
 }
 
+int
+corpus_alloc (struct corpus *c)
+{
+  const size_t s = reqcap (c->sentences.len, c->sentences.cap, 1024);
+  const size_t w = reqcap (c->words.len, c->words.cap, 32768);
+
+  resize (c, words, w);
+  resize (c, sentences, s);
+  return 0;
+}
+
 static int
 resize_words (struct corpus *c, size_t cap)
 {
   resize (c, words, cap);
-  if (corpus_rebuild (c) != 0)
+  if (corpus_build (c) != 0)
     return -1;
   return 0;
 }
@@ -81,23 +86,6 @@ resize_sentences (struct corpus *c, size_t cap)
 {
   resize (c, sentences, cap);
   return 0;
-}
-
-int
-corpus_grow (struct corpus *c, size_t words, size_t sentences)
-{
-  const size_t s = sizepow2 (sentences);
-  const size_t w = sizepow2 (words);
-  int r = 0;
-
-  if ((s < sentences) || (w < words))
-    return -1;
-
-  if (s > c->sentences.cap)
-    r |= resize_sentences (c, s);
-  if (w > c->words.cap)
-    r |= resize_words (c, w);
-  return r;
 }
 
 static int

@@ -30,13 +30,7 @@ vocab_new (void)
   v = mem_alloc (1, sizeof (struct vocab));
   if (v == NULL)
     goto error;
-  v->len = 0;
-  v->cap = 32768;
-  v->pool = mem_alloc (v->cap, sizeof (struct vocab_entry));
-  if (v->pool == NULL)
-    goto error;
-  v->table = mem_alloc (v->cap, sizeof (struct vocab_entry *));
-  if (v->table == NULL)
+  if (vocab_alloc (v) != 0)
     goto error;
   return v;
 error:
@@ -64,14 +58,23 @@ vocab_free (struct vocab *v)
   mem_free (v);
 }
 
-static inline float
-load_factor (const struct vocab *v)
+int
+vocab_alloc (struct vocab *v)
 {
-  return (float) v->len / (float) v->cap;
+  v->cap = reqcap (v->len, v->cap, 32768);
+  v->pool = mem_realloc (v->pool, v->cap, sizeof (struct vocab_entry));
+  if (v->pool == NULL)
+    return -1;
+  v->table = mem_realloc (v->table, v->cap, sizeof (struct vocab_entry *));
+  if (v->table == NULL)
+    return -1;
+  mem_clear (v->pool + v->len, v->cap - v->len, sizeof (struct vocab_entry));
+  mem_clear (v->table, v->cap, sizeof (struct vocab_entry *));
+  return 0;
 }
 
 int
-vocab_rebuild (struct vocab *v)
+vocab_build (struct vocab *v)
 {
   size_t i;
   size_t j;
@@ -89,23 +92,10 @@ vocab_rebuild (struct vocab *v)
   return 0;
 }
 
-int
-vocab_grow (struct vocab *v, size_t cap)
+static inline float
+load_factor (const struct vocab *v)
 {
-  cap = sizepow2 (cap);
-  if (cap < v->cap)
-    return -1;
-  v->cap = cap;
-  v->pool = mem_realloc (v->pool, v->cap, sizeof (struct vocab_entry));
-  if (v->pool == NULL)
-    return -1;
-  v->table = mem_realloc (v->table, v->cap, sizeof (struct vocab_entry *));
-  if (v->table == NULL)
-    return -1;
-  mem_clear (v->pool + v->len, v->cap - v->len, sizeof (struct vocab_entry));
-  if (vocab_rebuild (v) != 0)
-    return -1;
-  return 0;
+  return (float) v->len / (float) v->cap;
 }
 
 static int
@@ -131,7 +121,7 @@ vocab_shrink (struct vocab *v)
       break;
     v->len--;
   }
-  if (vocab_rebuild (v) != 0)
+  if (vocab_build (v) != 0)
     return -1;
   return 0;
 }
@@ -167,7 +157,10 @@ vocab_add (struct vocab *v, const char *w)
   }
 
   if (load_factor (v) > 0.7f) {
-    if (vocab_grow (v, v->cap << 2) != 0)
+    v->cap <<= 2;
+    if (vocab_alloc (v) != 0)
+      return -1;
+    if (vocab_build (v) != 0)
       return -1;
     i = find (v, h, w);
   }

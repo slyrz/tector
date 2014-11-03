@@ -26,8 +26,8 @@ struct corpus {
 struct corpus *corpus_new (struct vocab *v);
 void corpus_free (struct corpus *c);
 
+int corpus_alloc (struct corpus *c);
+int corpus_build (struct corpus *c);
 int corpus_parse (struct corpus *c, const char *path);
-int corpus_grow (struct corpus *c, size_t words, size_t sentences);
-int corpus_rebuild (struct corpus *c);
 
 #endif
