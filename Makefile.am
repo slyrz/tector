@@ -32,8 +32,10 @@ train_SOURCES = src/train.c
 vocab_SOURCES = src/vocab.c
 
 check_PROGRAMS = \
-  tests/filter
+  tests/filter \
+  tests/vocab
 
 tests_filter_SOURCES = tests/filter.c
+tests_vocab_SOURCES = tests/vocab.c
 
 TESTS = $(check_PROGRAMS)
