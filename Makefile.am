@@ -30,3 +30,10 @@ LDADD = libcore.a
 filter_SOURCES = src/filter.c
 train_SOURCES = src/train.c
 vocab_SOURCES = src/vocab.c
+
+check_PROGRAMS = \
+  tests/filter
+
+tests_filter_SOURCES = tests/filter.c
+
+TESTS = $(check_PROGRAMS)
