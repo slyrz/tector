@@ -2,14 +2,13 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include <err.h>
+#include <assert.h>
 
 #define test(inp,out) \
   do { \
     char buf[1024]; \
     strcpy (buf, inp); \
-    if (strcmp (filter (buf), out) != 0) \
-      err (EXIT_FAILURE, "expected '%s', got '%s'", out, buf); \
+    assert (strcmp (filter (buf), out) == 0); \
   } while (0)
 
 int
