@@ -10,7 +10,7 @@
     strcpy (buf, inp); \
     if (strcmp (filter (buf), out) != 0) \
       err (EXIT_FAILURE, "expected '%s', got '%s'", out, buf); \
-  } while (0);
+  } while (0)
 
 int
 main (void)
