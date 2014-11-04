@@ -168,7 +168,7 @@ const char *stopwords[] = {
 static int
 cmp (const void *a, const void *b)
 {
-  return strcmp (a, *(const char * const *) b);
+  return strcmp (a, *(const char *const *) b);
 }
 
 int

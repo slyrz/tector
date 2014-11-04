@@ -186,7 +186,7 @@ vocab_get (struct vocab *v, const char *w)
 }
 
 int
-vocab_get_index (struct vocab *v, const char *w, size_t * i)
+vocab_get_index (struct vocab *v, const char *w, size_t *i)
 {
   struct vocab_entry *entry;
 
