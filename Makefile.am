@@ -26,11 +26,7 @@ libcore_a_SOURCES = \
   src/core/string.c \
   src/core/vocab.c
 
+LDADD = libcore.a
 filter_SOURCES = src/filter.c
-filter_LDADD = libcore.a
-
 train_SOURCES = src/train.c
-train_LDADD = libcore.a
-
 vocab_SOURCES = src/vocab.c
-vocab_LDADD = libcore.a
