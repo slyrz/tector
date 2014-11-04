@@ -140,7 +140,7 @@ find (struct vocab *v, uint32_t h, const char *w)
       break;
     i = (i + 1) % v->cap;
   }
-  return i % v->cap;
+  return i;
 }
 
 int
