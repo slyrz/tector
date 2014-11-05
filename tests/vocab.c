@@ -39,7 +39,7 @@ main (void)
   assert (v->len == 0);
 
   for (i = 0; i < 10000; i++) {
-    j = lrand48 () % n;
+    j = (size_t) lrand48 () % n;
     assert (vocab_add (v, words[j]) == 0);
     c[j]++;
   }
