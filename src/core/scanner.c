@@ -102,7 +102,7 @@ scanner_readline (struct scanner *s, char *b, size_t l)
   if (endoffile (s))
     return -1;
 
-  while (c = get (s), c > 0) {
+  while (c = get (s), c >= 0) {
     if (isunicode (c)) {
       while (c = peek (s), (c > 0) && (isunicode (c)))
         get (s);
