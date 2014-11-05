@@ -29,14 +29,26 @@ const size_t words[] = {
   1, 2,
 };
 
-int
-main (void)
+static void
+verify (struct corpus *c)
 {
-  struct vocab *v;
-  struct corpus *c;
   size_t i;
   size_t j;
   size_t k;
+
+  assert (memcmp (c->words.ptr, words, c->words.len * sizeof (size_t)) == 0);
+  for (i = j = 0; i < c->sentences.len; i++) {
+    assert (c->sentences.ptr[i]->len == c->words.ptr[j++]);
+    for (k = 0; k < c->sentences.ptr[i]->len; k++)
+      assert (c->sentences.ptr[i]->words[k] == c->words.ptr[j++]);
+  }
+}
+
+int
+main (void)
+{
+  struct corpus *c;
+  struct vocab *v;
 
   v = vocab_new ();
   assert (v != NULL);
@@ -44,15 +56,18 @@ main (void)
   assert (vocab_add (v, "dog") == 0);
   assert (vocab_add (v, "frog") == 0);
   assert (vocab_add (v, "mous") == 0);
+
   c = corpus_new (v);
   assert (c != NULL);
   assert (corpus_parse (c, "tests/testdata/corpus.txt") == 0);
-  assert (memcmp (c->words.ptr, words, c->words.len * sizeof (size_t)) == 0);
-  for (i = j = 0; i < c->sentences.len; i++) {
-    assert (c->sentences.ptr[i]->len == c->words.ptr[j++]);
-    for (k = 0; k < c->sentences.ptr[i]->len; k++)
-      assert (c->sentences.ptr[i]->words[k] == c->words.ptr[j++]);
-  }
+  verify (c);
+  assert (corpus_save (c, "/tmp/corpus.bin") == 0);
+  corpus_free (c);
+
+  c = corpus_new (v);
+  assert (c != NULL);
+  assert (corpus_load (c, "/tmp/corpus.bin") == 0);
+  verify (c);
   corpus_free (c);
   vocab_free (v);
   return EXIT_SUCCESS;
