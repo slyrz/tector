@@ -113,11 +113,13 @@ cmp (const void *a, const void *b)
 }
 
 int
-vocab_shrink (struct vocab *v)
+vocab_shrink (struct vocab *v, int min)
 {
+  if (min <= 0)
+    return 0;
   qsort (v->pool, v->len, sizeof (struct vocab_entry), cmp);
   while (v->len > 0) {
-    if (v->pool[v->len - 1].count > 1)
+    if (v->pool[v->len - 1].count >= (uint32_t) min)
       break;
     v->len--;
   }

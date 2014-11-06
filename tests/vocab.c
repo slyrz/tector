@@ -44,14 +44,14 @@ main (void)
     c[j]++;
   }
   assert (v->len == n);
-  assert (vocab_shrink (v) == 0);
+  assert (vocab_shrink (v, 2) == 0);
   assert (v->len == n);
 
   assert (vocab_add (v, "spider") == 0);
   assert (vocab_add (v, "skunk") == 0);
   assert (vocab_add (v, "wallaby") == 0);
   assert (v->len == n + 3);
-  assert (vocab_shrink (v) == 0);
+  assert (vocab_shrink (v, 2) == 0);
   assert (v->len == n);
 
   for (i = 0; i < n; i++) {
