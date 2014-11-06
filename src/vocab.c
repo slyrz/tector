@@ -53,7 +53,7 @@ main (int argc, char **argv)
   }
 
   info ("vocab contains %zu words", v->len);
-  vocab_shrink (v);
+  vocab_shrink (v, 10);
   info ("vocab shrinked to %zu words", v->len);
 
   vocab_encode (v);
