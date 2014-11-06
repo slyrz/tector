@@ -7,6 +7,7 @@ noinst_LIBRARIES = \
   libcore.a
 
 bin_PROGRAMS = \
+  corpus \
   filter \
   train \
   vocab
@@ -27,6 +28,7 @@ libcore_a_SOURCES = \
   src/core/vocab.c
 
 LDADD = libcore.a
+corpus_SOURCES = src/corpus.c
 filter_SOURCES = src/filter.c
 train_SOURCES = src/train.c
 vocab_SOURCES = src/vocab.c
