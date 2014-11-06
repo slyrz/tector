@@ -12,13 +12,14 @@
 struct command command = {
   .name = "train",
   .args = "",
-  .opts = "clntvw",
+  .opts = "cilntvw",
 };
 
 static const char *corpus = "corpus.bin";
 static const char *neuralnetwork = "neuralnetwork.bin";
 static const char *vocab = "vocab.bin";
 static int threads = 4;
+static int iterations = 10;
 static size_t layers = 50;
 static size_t window = 5;
 
@@ -36,6 +37,7 @@ main (int argc, char **argv)
   options_get_str ('c', &corpus);
   options_get_str ('n', &neuralnetwork);
   options_get_str ('v', &vocab);
+  options_get_int ('i', &iterations);
   options_get_int ('t', &threads);
   options_get_size_t ('l', &layers);
   options_get_size_t ('w', &window);
