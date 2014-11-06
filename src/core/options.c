@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <limits.h>
 
 extern struct command command;
 
@@ -160,16 +161,28 @@ options_get_bool (char c, int *r)
   *r = (val (c) != NULL);
 }
 
+#define parseint(s,o,t,m) \
+  do { \
+    char *e; \
+    unsigned long v; \
+    errno = 0; \
+    v = strtoul (s, &e, 10); \
+    if ((errno == 0) && (*e == '\0') && (v <= (m))) \
+      (o) = (t) v; \
+  } while (0)
+
+void
+options_get_int (char c, int *r)
+{
+  if (val (c) == NULL)
+    return;
+  parseint (val (c), *r, int, INT_MAX);
+}
+
 void
 options_get_size_t (char c, size_t *r)
 {
-  char *e;
-  unsigned long v;
-
   if (val (c) == NULL)
     return;
-  errno = 0;
-  v = strtoul (val (c), &e, 10);
-  if ((errno == 0) && (*e == '\0') && (v <= SIZE_MAX))
-    *r = (size_t) v;
+  parseint (val (c), *r, size_t, SIZE_MAX);
 }
