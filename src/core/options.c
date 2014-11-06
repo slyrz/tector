@@ -18,6 +18,7 @@ static struct option options[32] = {
   makeoption ('c', "corpus", required_argument),
   makeoption ('h', "help", no_argument),
   makeoption ('l', "layers", required_argument),
+  makeoption ('m', "mincount", required_argument),
   makeoption ('n', "neuralnetwork", required_argument),
   makeoption ('r', "rebuild", no_argument),
   makeoption ('t', "threads", required_argument),
