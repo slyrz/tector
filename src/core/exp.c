@@ -212,7 +212,7 @@ static float exp_table[1024] = {
 };
 
 float
-expf (float x)
+exptabf (float x)
 {
   if (fabsf (x) >= 6.0f)
     return -1.0f;

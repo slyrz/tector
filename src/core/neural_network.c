@@ -138,7 +138,7 @@ worker (struct neural_network *restrict n, struct sentence **restrict s, size_t 
         f = 0.0f;
         for (c = 0; c < sl; c++)
           f += neu1[c] * n->syn1[c + e];
-        f = expf (f);
+        f = exptabf (f);
         if (f >= 0.0f) {
           g = (1.0f - (float) (code & 1) - f) * alpha;
           for (c = 0; c < sl; c++)
