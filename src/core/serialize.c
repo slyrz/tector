@@ -1,4 +1,5 @@
 #include "serialize.h"
+#include "log.h"
 
 #include <string.h>
 #include <fcntl.h>
@@ -109,17 +110,35 @@ error:
 int
 neural_network_load (struct neural_network *n, const char *path)
 {
+  char b[MAX_WORD_LENGTH];
   int fd;
+  size_t i;
+  size_t j;
+  size_t l;
 
   fd = open (path, flags_read);
   if (fd == -1)
     return -1;
   if (check (read, fd, &n->size, sizeof (n->size)) != 0)
     goto error;
+  // TODO: print warning
+  if (n->size.vocab != n->v->len)
+    n->size.vocab = n->v->len;
   if (neural_network_alloc (n) != 0)
     goto error;
-  if (check (read, fd, n->syn0, n->size.vocab * n->size.layer * sizeof (float)) != 0)
-    goto error;
+  for (i = 0; i < n->v->len; i++) {
+    if (check (read, fd, &l, sizeof (size_t)) != 0)
+      goto error;
+    if (check (read, fd, b, l) != 0)
+      goto error;
+    b[l] = '\0';
+    if (vocab_get_index (n->v, b, &j) == 0) {
+      if (check (read, fd, n->syn0 + j * n->size.layer, n->size.layer * sizeof (float)) != 0)
+        goto error;
+    }
+    else if (lseek (fd, (off_t) (n->size.layer * sizeof (float)), SEEK_CUR) < 0)
+      goto error;
+  }
   close (fd);
   return 0;
 error:
@@ -132,14 +151,23 @@ int
 neural_network_save (struct neural_network *n, const char *path)
 {
   int fd;
+  size_t i;
+  size_t l;
 
   fd = open (path, flags_write, 0666);
   if (fd == -1)
     return -1;
   if (check (write, fd, &n->size, sizeof (n->size)) != 0)
     goto error;
-  if (check (write, fd, n->syn0, n->size.vocab * n->size.layer * sizeof (float)) != 0)
-    goto error;
+  for (i = 0; i < n->v->len; i++) {
+    l = strlen (n->v->pool[i].data);
+    if (check (write, fd, &l, sizeof (size_t)) != 0)
+      goto error;
+    if (check (write, fd, n->v->pool[i].data, l) != 0)
+      goto error;
+    if (check (write, fd, n->syn0 + i * n->size.layer, n->size.layer * sizeof (float)) != 0)
+      goto error;
+  }
   close (fd);
   return 0;
 error:
