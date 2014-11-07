@@ -11,8 +11,8 @@
 #define MAX_LAYERS	10000
 
 struct neural_network {
-  const struct vocab *restrict v;
-  const struct corpus *restrict c;
+  struct vocab *v;
+  struct corpus *c;
   struct {
     size_t vocab;
     size_t layer;
