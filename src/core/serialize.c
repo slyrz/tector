@@ -2,13 +2,17 @@
 #include "log.h"
 
 #include <string.h>
+#include <stdarg.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
+
 const int flags_read = O_RDONLY;
 const int flags_write = O_CREAT | O_TRUNC | O_WRONLY;
+
+const uint32_t magic = 0x793981e5;
 
 /**
  * Wrapper around read/write, returns 0 on success and -1 on failure.
@@ -16,21 +20,66 @@ const int flags_write = O_CREAT | O_TRUNC | O_WRONLY;
 #define check(func,fd,ptr,size) \
   (-(func (fd, ptr, size) != (ssize_t) (size)))
 
-/**
- * Test if the file opened at fd is large enough to hold
- * nmemb items of size bytes. This is better than just calling read
- * because it can catch size_t overflows.
- */
-static int
-holds (int fd, size_t nmemb, size_t size)
-{
-  struct stat buf;
+struct header {
+  uint32_t magic;
+  uint64_t size[4];
+};
 
-  if (fstat (fd, &buf) == 0)
-    if (buf.st_size < SIZE_MAX)
-      return ((size_t) buf.st_size / size) >= nmemb;
+static int
+header_vread (int fd, size_t n, va_list ap)
+{
+  struct header h;
+  size_t i;
+
+  memset (&h, 0, sizeof (struct header));
+  if (check (read, fd, &h, sizeof (struct header)) != 0)
+    return -1;
+  if (h.magic != magic)
+    return -1;
+  for (i = 0; i < n; i++)
+    *(va_arg (ap, size_t *)) = (size_t) h.size[i];
   return 0;
 }
+
+static int
+header_vwrite (int fd, size_t n, va_list ap)
+{
+  struct header h;
+  size_t i;
+
+  memset (&h, 0, sizeof (struct header));
+  for (i = 0; i < n; i++)
+    h.size[i] = (uint64_t) va_arg (ap, size_t);
+  h.magic = magic;
+  if (check (write, fd, &h, sizeof (struct header)) != 0)
+    return -1;
+  return 0;
+}
+
+static int
+header_read (int fd, size_t n, ...)
+{
+  va_list ap;
+  int r;
+
+  va_start (ap, n);
+  r = header_vread (fd, n, ap);
+  va_end (ap);
+  return r;
+}
+
+static int
+header_write (int fd, size_t n, ...)
+{
+  va_list ap;
+  int r;
+
+  va_start (ap, n);
+  r = header_vwrite (fd, n, ap);
+  va_end (ap);
+  return r;
+}
+
 
 int
 vocab_load (struct vocab *v, const char *path)
@@ -40,9 +89,7 @@ vocab_load (struct vocab *v, const char *path)
   fd = open (path, flags_read);
   if (fd == -1)
     return -1;
-  if (check (read, fd, &v->len, sizeof (size_t)) != 0)
-    goto error;
-  if (holds (fd, v->len, sizeof (struct vocab_entry)) == 0)
+  if (header_read (fd, 1, &v->len) != 0)
     goto error;
   if (vocab_alloc (v) != 0)
     goto error;
@@ -66,7 +113,7 @@ vocab_save (struct vocab *v, const char *path)
   fd = open (path, flags_write, 0666);
   if (fd == -1)
     return -1;
-  if (check (write, fd, &v->len, sizeof (size_t)) != 0)
+  if (header_write (fd, 1, v->len) != 0)
     goto error;
   if (check (write, fd, v->pool, v->len * sizeof (struct vocab_entry)) != 0)
     goto error;
@@ -86,13 +133,7 @@ corpus_load (struct corpus *c, const char *path)
   fd = open (path, flags_read);
   if (fd == -1)
     return -1;
-  if (check (read, fd, &c->words.len, sizeof (size_t)) != 0)
-    goto error;
-  if (check (read, fd, &c->sentences.len, sizeof (size_t)) != 0)
-    goto error;
-  if (holds (fd, c->words.len, sizeof (size_t)) == 0)
-    goto error;
-  if (c->sentences.len > c->words.len)
+  if (header_read (fd, 2, &c->words.len, &c->sentences.len) != 0)
     goto error;
   if (corpus_alloc (c) != 0)
     goto error;
@@ -116,9 +157,7 @@ corpus_save (struct corpus *c, const char *path)
   fd = open (path, flags_write, 0666);
   if (fd == -1)
     return -1;
-  if (check (write, fd, &c->words.len, sizeof (size_t)) != 0)
-    goto error;
-  if (check (write, fd, &c->sentences.len, sizeof (size_t)) != 0)
+  if (header_write (fd, 2, c->words.len, c->sentences.len) != 0)
     goto error;
   if (check (write, fd, c->words.ptr, c->words.len * sizeof (size_t)) != 0)
     goto error;
@@ -142,11 +181,8 @@ neural_network_load (struct neural_network *n, const char *path)
   fd = open (path, flags_read);
   if (fd == -1)
     return -1;
-  if (check (read, fd, &n->size, sizeof (n->size)) != 0)
+  if (header_read (fd, 3, &n->size.vocab, &n->size.layer, &n->size.window) != 0)
     goto error;
-  // TODO: print warning
-  if (n->size.vocab != n->v->len)
-    n->size.vocab = n->v->len;
   if (neural_network_alloc (n) != 0)
     goto error;
   for (i = 0; i < n->v->len; i++) {
@@ -182,7 +218,7 @@ neural_network_save (struct neural_network *n, const char *path)
   fd = open (path, flags_write, 0666);
   if (fd == -1)
     return -1;
-  if (check (write, fd, &n->size, sizeof (n->size)) != 0)
+  if (header_write (fd, 3, n->size.vocab, n->size.layer, n->size.window) != 0)
     goto error;
   for (i = 0; i < n->v->len; i++) {
     l = strlen (n->v->pool[i].data);
