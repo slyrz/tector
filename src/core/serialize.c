@@ -4,6 +4,7 @@
 #include <string.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 
 const int flags_read = O_RDONLY;
@@ -15,6 +16,22 @@ const int flags_write = O_CREAT | O_TRUNC | O_WRONLY;
 #define check(func,fd,ptr,size) \
   (-(func (fd, ptr, size) != (ssize_t) (size)))
 
+/**
+ * Test if the file opened at fd is large enough to hold
+ * nmemb items of size bytes. This is better than just calling read
+ * because it can catch size_t overflows.
+ */
+static int
+holds (int fd, size_t nmemb, size_t size)
+{
+  struct stat buf;
+
+  if (fstat (fd, &buf) == 0)
+    if (buf.st_size < SIZE_MAX)
+      return ((size_t) buf.st_size / size) >= nmemb;
+  return 0;
+}
+
 int
 vocab_load (struct vocab *v, const char *path)
 {
@@ -24,6 +41,8 @@ vocab_load (struct vocab *v, const char *path)
   if (fd == -1)
     return -1;
   if (check (read, fd, &v->len, sizeof (size_t)) != 0)
+    goto error;
+  if (holds (fd, v->len, sizeof (struct vocab_entry)) == 0)
     goto error;
   if (vocab_alloc (v) != 0)
     goto error;
@@ -70,6 +89,10 @@ corpus_load (struct corpus *c, const char *path)
   if (check (read, fd, &c->words.len, sizeof (size_t)) != 0)
     goto error;
   if (check (read, fd, &c->sentences.len, sizeof (size_t)) != 0)
+    goto error;
+  if (holds (fd, c->words.len, sizeof (size_t)) == 0)
+    goto error;
+  if (c->sentences.len > c->words.len)
     goto error;
   if (corpus_alloc (c) != 0)
     goto error;
@@ -128,6 +151,8 @@ neural_network_load (struct neural_network *n, const char *path)
     goto error;
   for (i = 0; i < n->v->len; i++) {
     if (check (read, fd, &l, sizeof (size_t)) != 0)
+      goto error;
+    if (l >= MAX_WORD_LENGTH)
       goto error;
     if (check (read, fd, b, l) != 0)
       goto error;
