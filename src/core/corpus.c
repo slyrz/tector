@@ -56,8 +56,11 @@ corpus_build (struct corpus *c)
   size_t i;
   size_t j;
 
-  for (i = j = 0; i < c->sentences.len; i += 1, j += 1 + c->words.ptr[j])
+  for (i = j = 0; i < c->sentences.len; i += 1, j += 1 + c->words.ptr[j]) {
+    if (j >= c->words.len)
+      return -1;
     c->sentences.ptr[i] = (struct sentence *) &c->words.ptr[j];
+  }
   return 0;
 }
 
