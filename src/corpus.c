@@ -7,7 +7,7 @@
 struct command command = {
   .name = "corpus",
   .args = "TEXTFILE...",
-  .opts = "cw",
+  .opts = "cv",
 };
 
 static const char *corpus = "corpus.bin";
