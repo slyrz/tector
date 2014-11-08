@@ -191,7 +191,6 @@ neural_network_load (struct neural_network *n, const char *path)
   int fd;
   size_t i;
   size_t j;
-  size_t l;
 
   fd = open (path, flags_read);
   if (fd == -1)
@@ -201,9 +200,10 @@ neural_network_load (struct neural_network *n, const char *path)
   if (neural_network_alloc (n) != 0)
     goto error;
   for (i = 0; i < n->v->len; i++) {
-    if (check (read, fd, &l, sizeof (size_t)) != 0)
+    uint8_t l = 0;
+    if (check (read, fd, &l, sizeof (uint8_t)) != 0)
       goto error;
-    if (l >= MAX_WORD_LENGTH)
+    if ((l == 0) || (l >= MAX_WORD_LENGTH))
       goto error;
     if (check (read, fd, b, l) != 0)
       goto error;
@@ -228,7 +228,6 @@ neural_network_save (struct neural_network *n, const char *path)
 {
   int fd;
   size_t i;
-  size_t l;
 
   fd = open (path, flags_write, 0666);
   if (fd == -1)
@@ -236,8 +235,8 @@ neural_network_save (struct neural_network *n, const char *path)
   if (header_write (fd, 3, n->size.vocab, n->size.layer, n->size.window) != 0)
     goto error;
   for (i = 0; i < n->v->len; i++) {
-    l = strlen (n->v->pool[i].data);
-    if (check (write, fd, &l, sizeof (size_t)) != 0)
+    uint8_t l = strlen (n->v->pool[i].data);
+    if (check (write, fd, &l, sizeof (uint8_t)) != 0)
       goto error;
     if (check (write, fd, n->v->pool[i].data, l) != 0)
       goto error;

@@ -11,6 +11,10 @@
 #error "code length exceeds 64 bits"
 #endif
 
+#if MAX_WORD_LENGTH > 255
+#error "word length requires new serialize functions"
+#endif
+
 struct vocab_entry {
   uint32_t hash;
   uint32_t count;
