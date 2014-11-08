@@ -5,20 +5,16 @@
 #include <stdarg.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <sys/stat.h>
 #include <sys/types.h>
-
-
-const int flags_read = O_RDONLY;
-const int flags_write = O_CREAT | O_TRUNC | O_WRONLY;
-
-const uint32_t magic = 0x793981e5;
 
 /**
  * Wrapper around read/write, returns 0 on success and -1 on failure.
  */
 #define check(func,fd,ptr,size) \
   (-(func (fd, ptr, size) != (ssize_t) (size)))
+
+const int flags_read = O_RDONLY;
+const int flags_write = O_CREAT | O_TRUNC | O_WRONLY;
 
 struct header {
   uint64_t checksum;
@@ -46,7 +42,6 @@ header_vread (int fd, size_t n, va_list ap)
   struct header h;
   size_t i;
 
-  memset (&h, 0, sizeof (struct header));
   if (check (read, fd, &h, sizeof (struct header)) != 0)
     return -1;
   if (h.checksum != checksum (h.size))
@@ -235,7 +230,7 @@ neural_network_save (struct neural_network *n, const char *path)
   if (header_write (fd, 3, n->size.vocab, n->size.layer, n->size.window) != 0)
     goto error;
   for (i = 0; i < n->v->len; i++) {
-    uint8_t l = strlen (n->v->pool[i].data);
+    uint8_t l = (uint8_t) strlen (n->v->pool[i].data);
     if (check (write, fd, &l, sizeof (uint8_t)) != 0)
       goto error;
     if (check (write, fd, n->v->pool[i].data, l) != 0)
