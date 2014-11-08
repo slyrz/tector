@@ -21,9 +21,24 @@ const uint32_t magic = 0x793981e5;
   (-(func (fd, ptr, size) != (ssize_t) (size)))
 
 struct header {
-  uint32_t magic;
+  uint64_t checksum;
   uint64_t size[4];
 };
+
+static inline uint64_t
+checksum (uint64_t s[4])
+{
+  uint64_t h = 0x14c4f52f026b86c8ull;
+  h ^= s[0];
+  h *= 1099511628211ull;
+  h ^= s[1];
+  h *= 1099511628211ull;
+  h ^= s[2];
+  h *= 1099511628211ull;
+  h ^= s[3];
+  h *= 1099511628211ull;
+  return h;
+}
 
 static int
 header_vread (int fd, size_t n, va_list ap)
@@ -34,7 +49,7 @@ header_vread (int fd, size_t n, va_list ap)
   memset (&h, 0, sizeof (struct header));
   if (check (read, fd, &h, sizeof (struct header)) != 0)
     return -1;
-  if (h.magic != magic)
+  if (h.checksum != checksum (h.size))
     return -1;
   for (i = 0; i < n; i++)
     *(va_arg (ap, size_t *)) = (size_t) h.size[i];
@@ -50,7 +65,7 @@ header_vwrite (int fd, size_t n, va_list ap)
   memset (&h, 0, sizeof (struct header));
   for (i = 0; i < n; i++)
     h.size[i] = (uint64_t) va_arg (ap, size_t);
-  h.magic = magic;
+  h.checksum= checksum (h.size);
   if (check (write, fd, &h, sizeof (struct header)) != 0)
     return -1;
   return 0;
