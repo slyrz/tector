@@ -305,7 +305,7 @@ vocab_encode (struct vocab *v)
       point[i] = (int32_t) b;
     }
     entry->point[0] = (int32_t) v->len - 2;
-    entry->code = 0;
+    entry->code = 1ull << i;
     for (b = 0; b < i; b++) {
       entry->code |= (code & 1) << (i - b - 1);
       entry->point[i - b] = point[b] - (int32_t) v->len;
