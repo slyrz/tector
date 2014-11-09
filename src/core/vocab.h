@@ -7,8 +7,12 @@
 #define MAX_CODE_LENGTH 40
 #define MAX_WORD_LENGTH 80
 
-#if MAX_CODE_LENGTH > 64
-#error "code length exceeds 64 bits"
+/**
+ * The codes are stored as 64 bit integers and 1 bit, the MSB, is used to
+ * indicate the code length, thus 63 bit remain to store the code.
+ */
+#if MAX_CODE_LENGTH > 63
+#error "code length exceeds 64 bit"
 #endif
 
 #if MAX_WORD_LENGTH > 255
