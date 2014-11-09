@@ -55,7 +55,7 @@ vocab_new_from_path (const char *path)
 void
 vocab_free (struct vocab *v)
 {
-  mem_free (v->pool);
+  mem_free (v->entries);
   mem_free (v->table);
   mem_free (v);
 }
@@ -64,13 +64,13 @@ int
 vocab_alloc (struct vocab *v)
 {
   v->cap = reqcap (v->len, v->cap, 32768);
-  v->pool = mem_realloc (v->pool, v->cap, sizeof (struct vocab_entry));
-  if (v->pool == NULL)
+  v->entries = mem_realloc (v->entries, v->cap, sizeof (struct vocab_entry));
+  if (v->entries == NULL)
     return -1;
   v->table = mem_realloc (v->table, v->cap, sizeof (struct vocab_entry *));
   if (v->table == NULL)
     return -1;
-  mem_clear (v->pool + v->len, v->cap - v->len, sizeof (struct vocab_entry));
+  mem_clear (v->entries + v->len, v->cap - v->len, sizeof (struct vocab_entry));
   mem_clear (v->table, v->cap, sizeof (struct vocab_entry *));
   return 0;
 }
@@ -83,13 +83,13 @@ vocab_build (struct vocab *v)
 
   mem_clear (v->table, v->cap, sizeof (struct vocab_entry *));
   for (i = 0; i < v->len; i++) {
-    j = v->pool[i].hash;
+    j = v->entries[i].hash;
     for (;;) {
       if (v->table[j % v->cap] == NULL)
         break;
       j++;
     }
-    v->table[j % v->cap] = &v->pool[i];
+    v->table[j % v->cap] = &v->entries[i];
   }
   return 0;
 }
@@ -148,9 +148,9 @@ vocab_shrink (struct vocab *v, int min)
 {
   if (min <= 0)
     return 0;
-  qsort (v->pool, v->len, sizeof (struct vocab_entry), cmp);
+  qsort (v->entries, v->len, sizeof (struct vocab_entry), cmp);
   while (v->len > 0) {
-    if (v->pool[v->len - 1].count >= (uint32_t) min)
+    if (v->entries[v->len - 1].count >= (uint32_t) min)
       break;
     v->len--;
   }
@@ -169,7 +169,7 @@ find (struct vocab *v, uint32_t h, const char *w)
   for (;;) {
     entry = v->table[i];
     if ((entry == NULL)
-        || ((entry->hash == h) && (strcmp (entry->data, w) == 0)))
+        || ((entry->hash == h) && (strcmp (entry->word, w) == 0)))
       break;
     i = (i + 1) % v->cap;
   }
@@ -198,14 +198,14 @@ vocab_add (struct vocab *v, const char *w)
     i = find (v, h, w);
   }
 
-  entry = v->pool + v->len;
+  entry = v->entries + v->len;
   entry->hash = h;
   entry->count = 1;
   entry->code = 0;
-  strncpy (entry->data, w, MAX_WORD_LENGTH);
-  entry->data[MAX_WORD_LENGTH - 1] = 0;
+  strncpy (entry->word, w, MAX_WORD_LENGTH);
+  entry->word[MAX_WORD_LENGTH - 1] = 0;
 
-  v->table[i] = v->pool + v->len;
+  v->table[i] = v->entries + v->len;
   v->len++;
   return 0;
 }
@@ -226,7 +226,7 @@ vocab_get_index (struct vocab *v, const char *w, size_t *i)
   entry = vocab_get (v, w);
   if (entry == NULL)
     return -1;
-  *i = (size_t) (entry - v->pool);
+  *i = (size_t) (entry - v->entries);
   return 0;
 }
 
@@ -265,7 +265,7 @@ vocab_encode (struct vocab *v)
     goto cleanup;
 
   for (a = 0; a < v->len; a++)
-    count[a] = v->pool[a].count;
+    count[a] = v->entries[a].count;
 
   for (; a < v->len * 2; a++)
     count[a] = 0x10000000;
@@ -307,7 +307,7 @@ vocab_encode (struct vocab *v)
     binary[m2 / 32] |= 1u << (m2 % 32);
   }
 
-  entry = v->pool;
+  entry = v->entries;
   for (a = 0; a < v->len; a++) {
     code = 0;
     for (b = a, i = 0; b != (v->len * 2 - 2); b = parent[b], i++) {

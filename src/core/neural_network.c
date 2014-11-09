@@ -12,7 +12,7 @@
 #include <stdint.h>
 
 #define entry(v,s,i,j) \
-  ((v)->pool[(s)[i]->words[j]])
+  ((v)->entries[(s)[i]->words[j]])
 
 #define inrange(v,i,j) \
   (((v) >= (i)) && ((v) < (j)))

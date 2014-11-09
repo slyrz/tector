@@ -56,7 +56,7 @@ main (void)
 
   for (i = 0; i < n; i++) {
     assert (vocab_get_index (v, words[i], &j) == 0);
-    assert (v->pool[j].count == c[i]);
+    assert (v->entries[j].count == c[i]);
   }
   assert (vocab_save (v, "/tmp/vocab.bin") == 0);
   vocab_free (v);
@@ -68,7 +68,7 @@ main (void)
   assert (v->len == n);
   for (i = 0; i < n; i++) {
     assert (vocab_get_index (v, words[i], &j) == 0);
-    assert (v->pool[j].count == c[i]);
+    assert (v->entries[j].count == c[i]);
   }
   vocab_free (v);
   return EXIT_SUCCESS;

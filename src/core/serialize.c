@@ -103,7 +103,7 @@ vocab_load (struct vocab *v, const char *path)
     goto error;
   if (vocab_alloc (v) != 0)
     goto error;
-  if (check (read, fd, v->pool, v->len * sizeof (struct vocab_entry)) != 0)
+  if (check (read, fd, v->entries, v->len * sizeof (struct vocab_entry)) != 0)
     goto error;
   if (vocab_build (v) != 0)
     goto error;
@@ -125,7 +125,7 @@ vocab_save (struct vocab *v, const char *path)
     return -1;
   if (header_write (fd, 1, v->len) != 0)
     goto error;
-  if (check (write, fd, v->pool, v->len * sizeof (struct vocab_entry)) != 0)
+  if (check (write, fd, v->entries, v->len * sizeof (struct vocab_entry)) != 0)
     goto error;
   close (fd);
   return 0;
@@ -230,10 +230,10 @@ neural_network_save (struct neural_network *n, const char *path)
   if (header_write (fd, 3, n->size.vocab, n->size.layer, n->size.window) != 0)
     goto error;
   for (i = 0; i < n->v->len; i++) {
-    uint8_t l = (uint8_t) strlen (n->v->pool[i].data);
+    uint8_t l = (uint8_t) strlen (n->v->entries[i].word);
     if (check (write, fd, &l, sizeof (uint8_t)) != 0)
       goto error;
-    if (check (write, fd, n->v->pool[i].data, l) != 0)
+    if (check (write, fd, n->v->entries[i].word, l) != 0)
       goto error;
     if (check (write, fd, n->syn0 + i * n->size.layer, n->size.layer * sizeof (float)) != 0)
       goto error;

@@ -20,14 +20,14 @@ struct vocab_entry {
   uint32_t count;
   uint64_t code;
   int32_t point[MAX_CODE_LENGTH];
-  char data[MAX_WORD_LENGTH];
+  char word[MAX_WORD_LENGTH];
 };
 
 struct vocab {
   size_t cap;
   size_t len;
   struct vocab_entry **table;
-  struct vocab_entry *pool;
+  struct vocab_entry *entries;
 };
 
 struct vocab *vocab_new (void);
