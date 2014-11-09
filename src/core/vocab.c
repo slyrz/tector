@@ -210,24 +210,14 @@ vocab_add (struct vocab *v, const char *w)
   return 0;
 }
 
-struct vocab_entry *
-vocab_get (struct vocab *v, const char *w)
-{
-  uint32_t h = hash (w);
-  size_t i = find (v, h, w);
-  return v->table[i];
-}
-
 int
-vocab_get_index (struct vocab *v, const char *w, size_t *i)
+vocab_find (struct vocab *v, const char *w, size_t *p)
 {
-  struct vocab_entry *entry;
+  size_t i = find (v, hash (w), w);
 
-  entry = vocab_get (v, w);
-  if (entry == NULL)
-    return -1;
-  *i = (size_t) (entry - v->entries);
-  return 0;
+  if (v->table[i])
+    *p = (size_t) (v->table[i] - v->entries);
+  return -(v->table[i] == NULL);
 }
 
 int

@@ -203,7 +203,7 @@ neural_network_load (struct neural_network *n, const char *path)
     if (check (read, fd, b, l) != 0)
       goto error;
     b[l] = '\0';
-    if (vocab_get_index (n->v, b, &j) == 0) {
+    if (vocab_find (n->v, b, &j) == 0) {
       if (check (read, fd, n->syn0 + j * n->size.layer, n->size.layer * sizeof (float)) != 0)
         goto error;
     }

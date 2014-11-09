@@ -38,8 +38,7 @@ int vocab_alloc (struct vocab *v);
 int vocab_build (struct vocab *v);
 int vocab_parse (struct vocab *v, const char *path);
 int vocab_add (struct vocab *v, const char *w);
-struct vocab_entry *vocab_get (struct vocab *v, const char *w);
-int vocab_get_index (struct vocab *v, const char *w, size_t *i);
+int vocab_find (struct vocab *v, const char *w, size_t *p);
 int vocab_shrink (struct vocab *v, int min);
 int vocab_encode (struct vocab *v);
 

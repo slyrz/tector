@@ -102,7 +102,7 @@ add_sentence (struct corpus *c, char *s)
   append (c, words, 0);
 
   while (w = strtok_r (s, " ", &s), w) {
-    if (vocab_get_index (c->vocab, w, &x) != 0)
+    if (vocab_find (c->vocab, w, &x) != 0)
       continue;
     append (c, words, x);
     n++;
