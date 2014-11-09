@@ -179,7 +179,7 @@ find (struct vocab *v, uint32_t h, const char *w)
 int
 vocab_add (struct vocab *v, const char *w)
 {
-  struct vocab_entry *entry;
+  struct vocab_entry entry;
 
   uint32_t h = hash (w);
   size_t i = find (v, h, w);
@@ -198,14 +198,14 @@ vocab_add (struct vocab *v, const char *w)
     i = find (v, h, w);
   }
 
-  entry = v->entries + v->len;
-  entry->hash = h;
-  entry->count = 1;
-  entry->code = 0;
-  strncpy (entry->word, w, MAX_WORD_LENGTH);
-  entry->word[MAX_WORD_LENGTH - 1] = 0;
+  entry = (struct vocab_entry) {
+    .hash = h,
+    .count = 1,
+  };
+  strncpy (entry.word, w, MAX_WORD_LENGTH - 1);
 
-  v->table[i] = v->entries + v->len;
+  v->entries[v->len] = entry;
+  v->table[i] = &v->entries[v->len];
   v->len++;
   return 0;
 }
