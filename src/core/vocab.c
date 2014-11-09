@@ -226,7 +226,6 @@ vocab_encode (struct vocab *v)
   struct vocab_entry *entry;
 
   int32_t point[MAX_CODE_LENGTH];
-  uint64_t code;
 
   uint32_t a, b, i;
   uint32_t m1, m2;
@@ -299,18 +298,15 @@ vocab_encode (struct vocab *v)
 
   entry = v->entries;
   for (a = 0; a < v->len; a++) {
-    code = 0;
+    entry->code = 1ull;
     for (b = a, i = 0; b != (v->len * 2 - 2); b = parent[b], i++) {
-      code |= ((binary[b / 32] >> (b % 32)) & 1) << i;
+      entry->code <<= 1;
+      entry->code |= (binary[b / 32] >> (b % 32)) & 1ull;
       point[i] = (int32_t) b;
     }
     entry->point[0] = (int32_t) v->len - 2;
-    entry->code = 1ull << i;
-    for (b = 0; b < i; b++) {
-      entry->code |= (code & 1) << (i - b - 1);
+    for (b = 0; b < i; b++)
       entry->point[i - b] = point[b] - (int32_t) v->len;
-      code >>= 1;
-    }
     entry++;
   }
 cleanup:
