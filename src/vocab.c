@@ -16,32 +16,6 @@ struct command command = {
 static const char *vocab = "vocab.bin";
 static int mincount = 10;
 
-static void
-learn_sentence (struct vocab *v, char *s)
-{
-  char *w;
-  while (w = strtok_r (s, " ", &s), w)
-    vocab_add (v, w);
-}
-
-static void
-learn_file (struct vocab *v, const char *path)
-{
-  struct scanner *s;
-  char b[8192] = { 0 };
-
-  s = scanner_new (path);
-  if (s == NULL) {
-    error ("scanner_new (%s)", path);
-    return;
-  }
-  while (scanner_readline (s, b, sizeof (b)) >= 0) {
-    if (*b)
-      learn_sentence (v, filter (b));
-  }
-  scanner_free (s);
-}
-
 int
 main (int argc, char **argv)
 {
@@ -57,10 +31,8 @@ main (int argc, char **argv)
   if (v == NULL)
     fatal ("vocab_new");
 
-  for (i = k; i < argc; i++) {
-    info ("learning '%s'", argv[i]);
-    learn_file (v, argv[i]);
-  }
+  for (i = k; i < argc; i++)
+    vocab_parse (v, argv[i]);
 
   info ("vocab contains %zu words", v->len);
   vocab_shrink (v, mincount);

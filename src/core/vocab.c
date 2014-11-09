@@ -7,6 +7,8 @@
 #include "config.h"
 #include "vocab.h"
 #include "serialize.h"
+#include "scanner.h"
+#include "filter.h"
 #include "log.h"
 #include "mem.h"
 
@@ -90,6 +92,35 @@ vocab_build (struct vocab *v)
     v->table[j % v->cap] = &v->pool[i];
   }
   return 0;
+}
+
+static int
+parse_sentence (struct vocab *v, char *s)
+{
+  char *w;
+  while (w = strtok_r (s, " ", &s), w)
+    if (vocab_add (v, w) != 0)
+      return -1;
+  return 0;
+}
+
+int
+vocab_parse (struct vocab *v, const char *path)
+{
+  struct scanner *s;
+  char b[8192] = { 0 };
+  int r = 0;
+
+  s = scanner_new (path);
+  if (s == NULL)
+    return -1;
+  while (scanner_readline (s, b, sizeof (b)) >= 0) {
+    r = parse_sentence (v, filter (b));
+    if (r != 0)
+      break;
+  }
+  scanner_free (s);
+  return r;
 }
 
 static inline float
