@@ -16,6 +16,7 @@ libcore_a_SOURCES = \
   src/core/corpus.c \
   src/core/exp.c \
   src/core/filter.c \
+  src/core/hash.c \
   src/core/mem.c \
   src/core/neural_network.c \
   src/core/ngram.c \

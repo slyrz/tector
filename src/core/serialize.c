@@ -1,5 +1,6 @@
 #include "serialize.h"
 #include "log.h"
+#include "hash.h"
 
 #include <string.h>
 #include <stdarg.h>
@@ -17,24 +18,9 @@ const int flags_read = O_RDONLY;
 const int flags_write = O_CREAT | O_TRUNC | O_WRONLY;
 
 struct header {
-  uint64_t checksum;
+  uint32_t checksum;
   uint64_t size[4];
 };
-
-static inline uint64_t
-checksum (uint64_t s[4])
-{
-  uint64_t h = 0x14c4f52f026b86c8ull;
-  h ^= s[0];
-  h *= 1099511628211ull;
-  h ^= s[1];
-  h *= 1099511628211ull;
-  h ^= s[2];
-  h *= 1099511628211ull;
-  h ^= s[3];
-  h *= 1099511628211ull;
-  return h;
-}
 
 static int
 header_vread (int fd, size_t n, va_list ap)
@@ -44,7 +30,7 @@ header_vread (int fd, size_t n, va_list ap)
 
   if (check (read, fd, &h, sizeof (struct header)) != 0)
     return -1;
-  if (h.checksum != checksum (h.size))
+  if (h.checksum != hashptr (h.size, sizeof (h.size)))
     return -1;
   for (i = 0; i < n; i++)
     *(va_arg (ap, size_t *)) = (size_t) h.size[i];
@@ -60,7 +46,7 @@ header_vwrite (int fd, size_t n, va_list ap)
   memset (&h, 0, sizeof (struct header));
   for (i = 0; i < n; i++)
     h.size[i] = (uint64_t) va_arg (ap, size_t);
-  h.checksum= checksum (h.size);
+  h.checksum = hashptr (h.size, sizeof (h.size));
   if (check (write, fd, &h, sizeof (struct header)) != 0)
     return -1;
   return 0;

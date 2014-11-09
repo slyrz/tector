@@ -11,18 +11,9 @@
 #include "filter.h"
 #include "log.h"
 #include "mem.h"
+#include "hash.h"
 
 #include <string.h>
-
-static inline uint32_t
-hash (const char *restrict s)
-{
-  const unsigned char *w = (const unsigned char *) s;
-  uint32_t h = 0x811c9dc5;
-  while (*w)
-    h = (h ^ *w++) * 0x1000193;
-  return h;
-}
 
 struct vocab *
 vocab_new (void)
@@ -181,7 +172,7 @@ vocab_add (struct vocab *v, const char *w)
 {
   struct vocab_entry entry;
 
-  uint32_t h = hash (w);
+  uint32_t h = hashstr (w);
   size_t i = find (v, h, w);
 
   if (v->table[i]) {
@@ -213,7 +204,7 @@ vocab_add (struct vocab *v, const char *w)
 int
 vocab_find (struct vocab *v, const char *w, size_t *p)
 {
-  size_t i = find (v, hash (w), w);
+  size_t i = find (v, hashstr (w), w);
 
   if (v->table[i])
     *p = (size_t) (v->table[i] - v->entries);
