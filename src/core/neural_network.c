@@ -133,7 +133,7 @@ worker (struct neural_network *restrict n, struct sentence **restrict s, size_t 
       // hs
       code = entry (n->v, s, i, j).code;
       point = entry (n->v, s, i, j).point;
-      while (code) {
+      while (code > 1) {
         e = point[0] * sl;
         f = 0.0f;
         for (c = 0; c < sl; c++)
