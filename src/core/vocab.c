@@ -6,7 +6,6 @@
  */
 #include "config.h"
 #include "vocab.h"
-#include "serialize.h"
 #include "scanner.h"
 #include "filter.h"
 #include "log.h"
@@ -30,17 +29,6 @@ error:
   if (v)
     vocab_free (v);
   return NULL;
-}
-
-struct vocab *
-vocab_new_from_path (const char *path)
-{
-  struct vocab *v;
-
-  v = vocab_new ();
-  if (v)
-    vocab_load (v, path);
-  return v;
 }
 
 void
