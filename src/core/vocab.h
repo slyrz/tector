@@ -44,5 +44,6 @@ int vocab_add (struct vocab *v, const char *w);
 int vocab_find (struct vocab *v, const char *w, size_t *p);
 int vocab_shrink (struct vocab *v, int min);
 int vocab_encode (struct vocab *v);
+uint32_t vocab_id (struct vocab *v);
 
 #endif

@@ -125,11 +125,16 @@ int
 corpus_load (struct corpus *c, const char *path)
 {
   int fd;
+  uint32_t id;
 
   fd = open (path, flags_read);
   if (fd == -1)
     return -1;
   if (header_read (fd, 2, &c->words.len, &c->sentences.len) != 0)
+    goto error;
+  if (check (read, fd, &id, sizeof (uint32_t)) != 0)
+    goto error;
+  if (vocab_id (c->vocab) != id)
     goto error;
   if (corpus_alloc (c) != 0)
     goto error;
@@ -149,11 +154,15 @@ int
 corpus_save (struct corpus *c, const char *path)
 {
   int fd;
+  uint32_t id;
 
   fd = open (path, flags_write, 0666);
   if (fd == -1)
     return -1;
   if (header_write (fd, 2, c->words.len, c->sentences.len) != 0)
+    goto error;
+  id = vocab_id (c->vocab);
+  if (check (write, fd, &id, sizeof (uint32_t)) != 0)
     goto error;
   if (check (write, fd, c->words.ptr, c->words.len * sizeof (size_t)) != 0)
     goto error;
@@ -168,7 +177,6 @@ error:
 int
 neural_network_load (struct neural_network *n, const char *path)
 {
-  char b[MAX_WORD_LENGTH];
   int fd;
   size_t i;
   size_t j;
@@ -181,7 +189,8 @@ neural_network_load (struct neural_network *n, const char *path)
   if (neural_network_alloc (n) != 0)
     goto error;
   for (i = 0; i < n->v->len; i++) {
-    uint8_t l = 0;
+    uint8_t l, b[MAX_WORD_LENGTH];
+    l = 0;
     if (check (read, fd, &l, sizeof (uint8_t)) != 0)
       goto error;
     if ((l == 0) || (l >= MAX_WORD_LENGTH))

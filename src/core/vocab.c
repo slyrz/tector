@@ -294,3 +294,9 @@ cleanup:
   mem_free (parent);
   return -r;
 }
+
+uint32_t
+vocab_id (struct vocab *v)
+{
+  return hashptr (v->entries, v->len * sizeof (struct vocab_entry));
+}
