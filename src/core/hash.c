@@ -29,4 +29,3 @@ hashptr (const void *restrict ptr, size_t n)
     fnv_update (h, *w++);
   return h;
 }
-
