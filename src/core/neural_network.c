@@ -21,8 +21,6 @@ struct neural_network *
 neural_network_new (struct vocab *v, size_t layer, size_t window)
 {
   struct neural_network *n;
-  size_t a;
-  size_t b;
 
   n = mem_alloc (1, sizeof (struct neural_network));
   if (n == NULL)
@@ -32,14 +30,8 @@ neural_network_new (struct vocab *v, size_t layer, size_t window)
   n->size.vocab = v->len;
   n->size.layer = layer;
   n->size.window = window;
-
   if (neural_network_alloc (n) != 0)
     goto error;
-
-  for (a = 0; a < n->size.vocab; a++)
-    for (b = 0; b < n->size.layer; b++)
-      n->syn0[a * n->size.layer + b] = (float) (drand48 () - 0.5) / (float) n->size.layer;
-
   return n;
 error:
   if (n)
@@ -58,7 +50,8 @@ neural_network_free (struct neural_network *n)
 int
 neural_network_alloc (struct neural_network *n)
 {
-  const size_t s = n->size.vocab * n->size.layer;
+  size_t i;
+  size_t s;
 
   if ((n->size.window > MAX_WINDOW) || (n->size.layer > MAX_LAYERS))
     return -1;
@@ -66,6 +59,7 @@ neural_network_alloc (struct neural_network *n)
   mem_free (n->syn0);
   mem_free (n->syn1);
 
+  s = n->size.vocab * n->size.layer;
   n->syn0 = mem_align (s, sizeof (float), 128);
   n->syn1 = mem_align (s, sizeof (float), 128);
   if ((n->syn0 == NULL) || (n->syn1 == NULL))
@@ -73,6 +67,8 @@ neural_network_alloc (struct neural_network *n)
 
   mem_clear (n->syn0, s, sizeof (float));
   mem_clear (n->syn1, s, sizeof (float));
+  for (i = 0; i < s; i++)
+    n->syn0[i] = (float) (drand48 () - 0.5) / (float) n->size.layer;
   return 0;
 error:
   mem_freenull (n->syn0);
