@@ -99,8 +99,6 @@ worker (struct neural_network *restrict n, struct sentence **restrict s, size_t 
   float *neu1;
   float *neu2;
 
-  unsigned short rnd[3] = { 1, 2, 3 };
-
   neu1 = mem_alloc ((size_t) sl, sizeof (float));
   neu2 = mem_alloc ((size_t) sl, sizeof (float));
 
@@ -108,7 +106,7 @@ worker (struct neural_network *restrict n, struct sentence **restrict s, size_t 
     // TODO: adjust alpha
     // cbow
     for (j = 0; j < (long long) s[i]->len; j++) {
-      b = (long long) nrand48 (rnd) % sw;
+      b = (long long) lrand48 () % sw;
       d = 0;
       // in -> hidden
       for (a = b; a < (long long) sw * 2 + 1 - b; a++) {
