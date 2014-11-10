@@ -69,6 +69,14 @@ main (void)
   assert (corpus_load (c, "/tmp/corpus.bin") == 0);
   verify (c);
   corpus_free (c);
+
+  assert (vocab_add (v, "spider") == 0);
+
+  c = corpus_new (v);
+  assert (c != NULL);
+  assert (corpus_load (c, "/tmp/corpus.bin") != 0);
+  corpus_free (c);
+
   vocab_free (v);
   return EXIT_SUCCESS;
 }
