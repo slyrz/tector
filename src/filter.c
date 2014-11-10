@@ -27,8 +27,9 @@ main (int argc, char **argv)
       continue;
     }
     while (scanner_readline (s, b, sizeof (b)) >= 0) {
+      filter (b);
       if (*b)
-        puts (filter (b));
+        puts (b);
     }
     scanner_free (s);
   }
