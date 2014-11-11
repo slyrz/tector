@@ -85,7 +85,7 @@ error:
   return -1;
 }
 
-static size_t
+static inline size_t
 subsample (struct sentence *dst, const struct sentence *src, size_t n)
 {
   size_t i;
