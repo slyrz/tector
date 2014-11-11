@@ -10,9 +10,10 @@
 
 #include <string.h>
 #include <stdint.h>
+#include <math.h>
 
-#define entry(v,s,i,j) \
-  ((v)->entries[(s)[i]->words[j]])
+#define entry(v,s,p) \
+  ((v)->entries[(s)->words[p]])
 
 #define inrange(v,i,j) \
   (((v) >= (i)) && ((v) < (j)))
@@ -76,6 +77,36 @@ error:
   return -1;
 }
 
+static size_t
+subsample (struct sentence *dst, const struct sentence *src, size_t n)
+{
+  size_t i;
+
+  /**
+   * The sampling is losely-based on Zipf's law, which states that the
+   * probability of encountering a word is given by the word's rank alone:
+   *
+   *    P(r) = r^a
+   *
+   * where a is a number close to -1. So that's why this sampling method
+   * solely works on the vocabulary indexes, and doesn't look up
+   * the word counts stored in the entries.
+   *
+   * Here the square root is used to slow the decay down; the + 2 is used
+   * to let the zero-based numbering start at sqrt(2); and the numerator
+   * makes sure that the highest ranked word has a probability of 0.5 to
+   * be drawn.
+   */
+  dst->len = 0;
+  for (i = 0; i < src->len; i++) {
+    if (dst->len >= n)
+      break;
+    if (drand48 () > (0.7071067811865476 / sqrt ((double) (src->words[i] + 2))))
+      dst->words[dst->len++] = src->words[i];
+  }
+  return dst->len;
+}
+
 static void
 worker (struct neural_network *restrict n, struct sentence **restrict s, size_t k)
 {
@@ -83,6 +114,8 @@ worker (struct neural_network *restrict n, struct sentence **restrict s, size_t 
 
   const long long sw = (long long) n->size.window;
   const long long sl = (long long) n->size.layer;
+
+  struct sentence *sent;
 
   long long a, b, c, d, e;
 
@@ -101,11 +134,14 @@ worker (struct neural_network *restrict n, struct sentence **restrict s, size_t 
 
   neu1 = mem_alloc ((size_t) sl, sizeof (float));
   neu2 = mem_alloc ((size_t) sl, sizeof (float));
+  sent = mem_alloc (512, sizeof (size_t));
 
   for (i = 0; i < (long long) k; i++) {
+    if (subsample (sent, s[i], 511) == 0)
+      continue;
     // TODO: adjust alpha
     // cbow
-    for (j = 0; j < (long long) s[i]->len; j++) {
+    for (j = 0; j < (long long) sent->len; j++) {
       b = (long long) lrand48 () % sw;
       d = 0;
       // in -> hidden
@@ -113,8 +149,8 @@ worker (struct neural_network *restrict n, struct sentence **restrict s, size_t 
         if (a == sw)
           continue;
         c = j + a - sw;
-        if (inrange (c, 0, (long long) s[i]->len)) {
-          x = (long long) s[i]->words[c] * sl;
+        if (inrange (c, 0, (long long) sent->len)) {
+          x = (long long) sent->words[c] * sl;
           for (c = 0; c < sl; c++)
             neu1[c] += n->syn0[x + c];
           d++;
@@ -125,8 +161,8 @@ worker (struct neural_network *restrict n, struct sentence **restrict s, size_t 
       for (c = 0; c < sl; c++)
         neu1[c] /= (float) d;
       // hs
-      code = entry (n->v, s, i, j).code;
-      point = entry (n->v, s, i, j).point;
+      code = entry (n->v, sent, j).code;
+      point = entry (n->v, sent, j).point;
       while (code > 1) {
         e = point[0] * sl;
         f = 0.0f;
@@ -148,8 +184,8 @@ worker (struct neural_network *restrict n, struct sentence **restrict s, size_t 
         if (a == sw)
           continue;
         c = j + a - sw;
-        if (inrange (c, 0, (long long) s[i]->len)) {
-          x = (long long) s[i]->words[c] * sl;
+        if (inrange (c, 0, (long long) sent->len)) {
+          x = (long long) sent->words[c] * sl;
           for (c = 0; c < sl; c++)
             n->syn0[c + x] += neu2[c];
         }
@@ -160,6 +196,7 @@ worker (struct neural_network *restrict n, struct sentence **restrict s, size_t 
   }
   mem_free (neu1);
   mem_free (neu2);
+  mem_free (sent);
 }
 
 int
