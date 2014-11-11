@@ -7,6 +7,7 @@
 #include "neural_network.h"
 #include "exp.h"
 #include "mem.h"
+#include "log.h"
 
 #include <string.h>
 #include <stdint.h>
@@ -196,6 +197,8 @@ neural_network_train (struct neural_network *n, struct corpus *c)
 
   s = mem_alloc (512, sizeof (size_t));
   for (i = 0; i < c->sentences.len; i++) {
+    if ((i & 0xfff) == 0)
+      progress (i, c->sentences.len, "training");
     if (subsample (s, c->sentences.ptr[i], 511) == 0)
       continue;
     train_bag_of_words (n, s);
