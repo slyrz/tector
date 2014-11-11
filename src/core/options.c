@@ -22,7 +22,6 @@ static struct option options[32] = {
   makeoption ('m', "mincount", required_argument),
   makeoption ('n', "neuralnetwork", required_argument),
   makeoption ('r', "rebuild", no_argument),
-  makeoption ('t', "threads", required_argument),
   makeoption ('v', "vocab", required_argument),
   makeoption ('w', "window", required_argument),
 };
