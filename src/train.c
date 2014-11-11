@@ -18,7 +18,7 @@ struct command command = {
 static const char *corpus = "corpus.bin";
 static const char *neuralnetwork = "neuralnetwork.bin";
 static const char *vocab = "vocab.bin";
-static int iterations = 10;
+static size_t iterations = 10;
 static size_t layers = 50;
 static size_t window = 5;
 
@@ -36,7 +36,7 @@ main (int argc, char **argv)
   options_get_str ('c', &corpus);
   options_get_str ('n', &neuralnetwork);
   options_get_str ('v', &vocab);
-  options_get_int ('i', &iterations);
+  options_get_size_t ('i', &iterations);
   options_get_size_t ('l', &layers);
   options_get_size_t ('w', &window);
 
@@ -55,7 +55,9 @@ main (int argc, char **argv)
   n = neural_network_new (v, layers, window);
   if (n == NULL)
     fatal ("neural_network_new");
-  neural_network_train (n, c);
+
+  for (i = 0; i < iterations; i++)
+    neural_network_train (n, c);
 
   for (i = 0; i < 10; i++) {
     printf ("%s:\n", v->entries[i].word);
