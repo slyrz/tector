@@ -189,9 +189,10 @@ neural_network_load (struct neural_network *n, const char *path)
   if (neural_network_alloc (n) != 0)
     goto error;
   for (i = 0; i < n->v->len; i++) {
-    uint8_t l, b[MAX_WORD_LENGTH];
+    unsigned char l;
+    char b[MAX_WORD_LENGTH];
     l = 0;
-    if (check (read, fd, &l, sizeof (uint8_t)) != 0)
+    if (check (read, fd, &l, sizeof (unsigned char)) != 0)
       goto error;
     if ((l == 0) || (l >= MAX_WORD_LENGTH))
       goto error;
