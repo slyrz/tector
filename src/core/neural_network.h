@@ -18,8 +18,11 @@ struct neural_network {
     size_t layer;
     size_t window;
   } size;
+  float alpha;
   float *syn0;
   float *syn1;
+  float *neu1;
+  float *neu2;
 };
 
 struct neural_network *neural_network_new (struct vocab *v, size_t layer, size_t window);

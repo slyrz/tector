@@ -31,6 +31,7 @@ neural_network_new (struct vocab *v, size_t layer, size_t window)
   n->size.vocab = v->len;
   n->size.layer = layer;
   n->size.window = window;
+  n->alpha = 0.025f;
   if (neural_network_alloc (n) != 0)
     goto error;
   return n;
@@ -45,6 +46,8 @@ neural_network_free (struct neural_network *n)
 {
   mem_free (n->syn0);
   mem_free (n->syn1);
+  mem_free (n->neu1);
+  mem_free (n->neu2);
   mem_free (n);
 }
 
@@ -52,28 +55,33 @@ int
 neural_network_alloc (struct neural_network *n)
 {
   size_t i;
-  size_t s;
 
   if ((n->size.window > MAX_WINDOW) || (n->size.layer > MAX_LAYERS))
     return -1;
 
   mem_free (n->syn0);
   mem_free (n->syn1);
+  mem_free (n->neu1);
+  mem_free (n->neu2);
 
-  s = n->size.vocab * n->size.layer;
-  n->syn0 = mem_align (s, sizeof (float), 128);
-  n->syn1 = mem_align (s, sizeof (float), 128);
+  n->syn0 = mem_alloc (n->size.layer * n->size.vocab, sizeof (float));
+  n->syn1 = mem_alloc (n->size.layer * n->size.vocab, sizeof (float));
   if ((n->syn0 == NULL) || (n->syn1 == NULL))
     goto error;
 
-  mem_clear (n->syn0, s, sizeof (float));
-  mem_clear (n->syn1, s, sizeof (float));
-  for (i = 0; i < s; i++)
+  n->neu1 = mem_alloc (n->size.layer, sizeof (float));
+  n->neu2 = mem_alloc (n->size.layer, sizeof (float));
+  if ((n->neu1 == NULL) || (n->neu2 == NULL))
+    goto error;
+
+  for (i = 0; i < n->size.layer * n->size.vocab; i++)
     n->syn0[i] = (float) (drand48 () - 0.5) / (float) n->size.layer;
   return 0;
 error:
   mem_freenull (n->syn0);
   mem_freenull (n->syn1);
+  mem_freenull (n->neu1);
+  mem_freenull (n->neu2);
   return -1;
 }
 
@@ -107,101 +115,91 @@ subsample (struct sentence *dst, const struct sentence *src, size_t n)
   return dst->len;
 }
 
-static void
-worker (struct neural_network *restrict n, struct sentence **restrict s, size_t k)
+static inline void
+hierarchical_softmax (struct neural_network *restrict n, struct vocab_entry *restrict e)
 {
-  const float alpha = 0.025f;
+  const long long sl = (long long) n->size.layer;
 
+  long long i, j;
+  float f, g;
+
+  uint64_t code = e->code;
+  int32_t *point = e->point;
+
+  while (code > 1) {
+    j = point[0] * sl;
+    f = 0.0f;
+    for (i = 0; i < sl; i++)
+      f += n->neu1[i] * n->syn1[i + j];
+    f = exptabf (f);
+    if (f >= 0.0f) {
+      g = (1.0f - (float) (code & 1) - f) * n->alpha;
+      for (i = 0; i < sl; i++)
+        n->neu2[i] += g * n->syn1[i + j];
+      for (i = 0; i < sl; i++)
+        n->syn1[i + j] += g * n->neu1[i];
+    }
+    code >>= 1;
+    point++;
+  }
+}
+
+static inline void
+train_bag_of_words (struct neural_network *restrict n, struct sentence *restrict s)
+{
   const long long sw = (long long) n->size.window;
   const long long sl = (long long) n->size.layer;
 
-  struct sentence *sent;
+  long long a, b, c, d, e, i;
 
-  long long a, b, c, d, e;
-
-  float f;
-  float g;
-
-  uint64_t code;
-  int32_t *point;
-
-  long long i;
-  long long j;
-  long long x;
-
-  float *neu1;
-  float *neu2;
-
-  neu1 = mem_alloc ((size_t) sl, sizeof (float));
-  neu2 = mem_alloc ((size_t) sl, sizeof (float));
-  sent = mem_alloc (512, sizeof (size_t));
-
-  for (i = 0; i < (long long) k; i++) {
-    if (subsample (sent, s[i], 511) == 0)
-      continue;
-    // TODO: adjust alpha
-    // cbow
-    for (j = 0; j < (long long) sent->len; j++) {
-      b = (long long) lrand48 () % sw;
-      d = 0;
-      // in -> hidden
-      for (a = b; a < (long long) sw * 2 + 1 - b; a++) {
-        if (a == sw)
-          continue;
-        c = j + a - sw;
-        if (inrange (c, 0, (long long) sent->len)) {
-          x = (long long) sent->words[c] * sl;
-          for (c = 0; c < sl; c++)
-            neu1[c] += n->syn0[x + c];
-          d++;
-        }
-      }
-      if (d == 0)
+  for (i = 0; i < (long long) s->len; i++) {
+    b = (long long) lrand48 () % sw;
+    d = 0;
+    // in -> hidden
+    for (a = b; a < (long long) sw * 2 + 1 - b; a++) {
+      if (a == sw)
         continue;
-      for (c = 0; c < sl; c++)
-        neu1[c] /= (float) d;
-      // hs
-      code = entry (n->v, sent, j).code;
-      point = entry (n->v, sent, j).point;
-      while (code > 1) {
-        e = point[0] * sl;
-        f = 0.0f;
+      c = i + a - sw;
+      if (inrange (c, 0, (long long) s->len)) {
+        e = (long long) s->words[c] * sl;
         for (c = 0; c < sl; c++)
-          f += neu1[c] * n->syn1[c + e];
-        f = exptabf (f);
-        if (f >= 0.0f) {
-          g = (1.0f - (float) (code & 1) - f) * alpha;
-          for (c = 0; c < sl; c++)
-            neu2[c] += g * n->syn1[c + e];
-          for (c = 0; c < sl; c++)
-            n->syn1[c + e] += g * neu1[c];
-        }
-        code >>= 1;
-        point++;
+          n->neu1[c] += n->syn0[e + c];
+        d++;
       }
-      // hidden -> in
-      for (a = b; a < sw * 2 + 1 - b; a++) {
-        if (a == sw)
-          continue;
-        c = j + a - sw;
-        if (inrange (c, 0, (long long) sent->len)) {
-          x = (long long) sent->words[c] * sl;
-          for (c = 0; c < sl; c++)
-            n->syn0[c + x] += neu2[c];
-        }
-      }
-      mem_clear (neu1, (size_t) sl, sizeof (float));
-      mem_clear (neu2, (size_t) sl, sizeof (float));
     }
+    if (d == 0)
+      continue;
+    for (c = 0; c < sl; c++)
+      n->neu1[c] /= (float) d;
+    hierarchical_softmax (n, n->v->entries + s->words[i]);
+    // hidden -> in
+    for (a = b; a < sw * 2 + 1 - b; a++) {
+      if (a == sw)
+        continue;
+      c = i + a - sw;
+      if (inrange (c, 0, (long long) s->len)) {
+        e = (long long) s->words[c] * sl;
+        for (c = 0; c < sl; c++)
+          n->syn0[c + e] += n->neu2[c];
+      }
+    }
+    mem_clear (n->neu1, (size_t) sl, sizeof (float));
+    mem_clear (n->neu2, (size_t) sl, sizeof (float));
   }
-  mem_free (neu1);
-  mem_free (neu2);
-  mem_free (sent);
 }
 
 int
 neural_network_train (struct neural_network *n, struct corpus *c)
 {
-  worker (n, c->sentences.ptr, c->sentences.len);
+  struct sentence *s;
+  size_t i;
+
+  s = mem_alloc (512, sizeof (size_t));
+  for (i = 0; i < c->sentences.len; i++) {
+    if (subsample (s, c->sentences.ptr[i], 511) == 0)
+      continue;
+    train_bag_of_words (n, s);
+  }
+  mem_free (s);
   return 0;
 }
