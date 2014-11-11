@@ -83,7 +83,7 @@ subsample (struct sentence *dst, const struct sentence *src, size_t n)
   size_t i;
 
   /**
-   * The sampling is losely-based on Zipf's law, which states that the
+   * The sampling is loosely-based on Zipf's law, which states that the
    * probability of encountering a word is given by the word's rank alone:
    *
    *    P(r) = r^a
