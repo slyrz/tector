@@ -38,6 +38,7 @@ check_PROGRAMS = \
   tests/corpus \
   tests/filter \
   tests/load \
+  tests/options \
   tests/scanner \
   tests/vocab
 

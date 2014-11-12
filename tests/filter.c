@@ -21,6 +21,8 @@ main (void)
   test ("Test", "test");
   test ("TEST", "test");
   test ("test test", "test test");
+  test ("-test-", "test");
+  test ("test-test", "test test");
   test ("testing tests", "test test");
   test ("test test   \0test", "test test");
   test ("test test t#es!t", "test test test");

@@ -49,6 +49,7 @@ main (void)
 {
   struct corpus *c;
   struct vocab *v;
+  int i;
 
   v = vocab_new ();
   assert (v != NULL);
@@ -75,6 +76,11 @@ main (void)
   c = corpus_new (v);
   assert (c != NULL);
   assert (corpus_load (c, "/tmp/corpus.bin") != 0);
+  corpus_free (c);
+
+  c = corpus_new (v);
+  for (i = 0; i < 500; i++)
+    assert (corpus_parse (c, "tests/testdata/corpus.txt") == 0);
   corpus_free (c);
 
   vocab_free (v);
