@@ -22,6 +22,6 @@
   } while (0)
 
 #define progress(i,t,msg,...) \
-  info (msg " => %.2f %%", ##__VA_ARGS__, ((float) (i) / (float) (t)) * 100.0f)
+  info (msg " => %.2f %%", ##__VA_ARGS__, ((double) (i) / (double) (t)) * 100.0)
 
 #endif
