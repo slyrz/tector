@@ -66,7 +66,7 @@ print_option (const struct option *opt)
 static void
 print_usage_and_exit (struct option *longopts)
 {
-  fprintf (stderr, "%s [OPTION...] %s\n\nOption:\n", command.name, command.args);
+  fprintf (stderr, "%s [OPTION...] %s\n\nOption:\n", command.name, command.args ? command.args : "");
   while (longopts->name)
     print_option (longopts++);
   exit (0);
