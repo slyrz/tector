@@ -13,9 +13,6 @@
 #include <stdint.h>
 #include <math.h>
 
-#define entry(v,s,p) \
-  ((v)->entries[(s)->words[p]])
-
 #define inrange(v,i,j) \
   (((v) >= (i)) && ((v) < (j)))
 
