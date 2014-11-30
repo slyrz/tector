@@ -111,9 +111,9 @@ add_sentence (struct corpus *c, char *s)
     append (c, words, x);
     n++;
   }
-  if (n == 0) {
+  if (n <= 1) {
+    c->words.len -= 1 + n;
     c->sentences.len--;
-    c->words.len--;
   }
   else {
     c->sentences.ptr[c->sentences.len - 1]->len = n;
