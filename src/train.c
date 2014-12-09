@@ -11,7 +11,6 @@
 
 struct command command = {
   .name = "train",
-  .args = "",
   .opts = "cilnvw",
 };
 
@@ -62,7 +61,7 @@ main (int argc, char **argv)
   for (i = 0; i < 10; i++) {
     printf ("%s:\n", v->entries[i].word);
     for (j = 0; j < n->size.layer; j++)
-      printf ("%lf ", (double) n->syn0[i * n->size.layer + j]);
+      printf ("%f ", (double) n->syn0[i * n->size.layer + j]);
     putchar ('\n');
   }
 
