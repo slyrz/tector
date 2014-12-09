@@ -29,7 +29,7 @@ neural_network_new (struct vocab *v, size_t layer, size_t window)
   n->size.vocab = v->len;
   n->size.layer = layer;
   n->size.window = window;
-  n->alpha = 0.025f;
+  n->alpha = 0.05f;
   if (neural_network_alloc (n) != 0)
     goto error;
   return n;
