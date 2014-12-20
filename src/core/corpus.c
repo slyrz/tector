@@ -1,6 +1,5 @@
 #include "corpus.h"
 #include "scanner.h"
-#include "filter.h"
 #include "log.h"
 #include "mem.h"
 
@@ -133,7 +132,7 @@ corpus_parse (struct corpus *c, const char *path)
 
   while (scanner_readline (s, b, sizeof (b)) >= 0) {
     if (*b)
-      if (add_sentence (c, filter (b)) != 0)
+      if (add_sentence (c, b) != 0)
         return -1;
   }
   scanner_free (s);

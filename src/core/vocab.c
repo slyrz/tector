@@ -7,7 +7,6 @@
 #include "config.h"
 #include "vocab.h"
 #include "scanner.h"
-#include "filter.h"
 #include "log.h"
 #include "mem.h"
 #include "hash.h"
@@ -94,7 +93,7 @@ vocab_parse (struct vocab *v, const char *path)
   if (s == NULL)
     return -1;
   while (scanner_readline (s, b, sizeof (b)) >= 0) {
-    r = parse_sentence (v, filter (b));
+    r = parse_sentence (v, b);
     if (r != 0)
       break;
   }
