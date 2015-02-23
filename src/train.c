@@ -43,20 +43,20 @@ main (int argc, char **argv)
   if (v == NULL)
     fatal ("vocab_new");
 
+  c = corpus_new (v);
+  if (c == NULL)
+    fatal ("corpus_new");
+
+  for (i = k; i < argc; i++)
+    if (corpus_parse (c, argv[i]) != 0)
+      fatal ("corpus_parse");
+
   n = neural_network_new (v, layers, window);
   if (n == NULL)
     fatal ("neural_network_new");
 
-  for (i = k; i < argc; i++) {
-    c = corpus_new (v);
-    if (c == NULL)
-      fatal ("corpus_new");
-    if (corpus_parse (c, argv[i]) != 0)
-      fatal ("corpus_parse");
-    for (j = 0; j < iterations; j++)
-      neural_network_train (n, c);
-    corpus_free (c);
-  }
+  for (j = 0; j < iterations; j++)
+    neural_network_train (n, c);
 
   for (i = 0; i < 10; i++) {
     printf ("%s:\n", v->entries[i].word);
@@ -72,6 +72,7 @@ main (int argc, char **argv)
    */
 
   neural_network_free (n);
+  corpus_free (c);
   vocab_free (v);
   return 0;
 }
