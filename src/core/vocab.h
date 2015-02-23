@@ -35,8 +35,9 @@ struct vocab {
 };
 
 struct vocab *vocab_new (void);
+struct vocab *vocab_open (const char *path);
 void vocab_free (struct vocab *v);
-
+int vocab_save (struct vocab *v, const char *path);
 int vocab_alloc (struct vocab *v);
 int vocab_build (struct vocab *v);
 int vocab_parse (struct vocab *v, const char *path);

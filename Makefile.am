@@ -7,7 +7,6 @@ noinst_LIBRARIES = \
   libcore.a
 
 bin_PROGRAMS = \
-  corpus \
   filter \
   train \
   vocab
@@ -15,6 +14,7 @@ bin_PROGRAMS = \
 libcore_a_SOURCES = \
   src/core/corpus.c \
   src/core/exp.c \
+  src/core/file.c \
   src/core/filter.c \
   src/core/hash.c \
   src/core/mem.c \
@@ -22,14 +22,12 @@ libcore_a_SOURCES = \
   src/core/ngram.c \
   src/core/options.c \
   src/core/scanner.c \
-  src/core/serialize.c \
   src/core/stem.c \
   src/core/stopwords.c \
   src/core/string.c \
   src/core/vocab.c
 
 LDADD = libcore.a
-corpus_SOURCES = src/corpus.c
 filter_SOURCES = src/filter.c
 train_SOURCES = src/train.c
 vocab_SOURCES = src/vocab.c

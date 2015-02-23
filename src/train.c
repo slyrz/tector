@@ -11,10 +11,10 @@
 
 struct command command = {
   .name = "train",
-  .opts = "cilnvw",
+  .opts = "ilnvw",
+  .args = "TEXTFILE...",
 };
 
-static const char *corpus = "corpus.bin";
 static const char *neuralnetwork = "neuralnetwork.bin";
 static const char *vocab = "vocab.bin";
 static size_t iterations = 10;
@@ -28,35 +28,35 @@ main (int argc, char **argv)
   struct neural_network *n;
   struct vocab *v;
 
-  size_t i;
-  size_t j;
+  int i;
+  int j;
+  int k;
 
-  options_parse (argc, argv);
-  options_get_str ('c', &corpus);
+  k = options_parse (argc, argv);
   options_get_str ('n', &neuralnetwork);
   options_get_str ('v', &vocab);
   options_get_size_t ('i', &iterations);
   options_get_size_t ('l', &layers);
   options_get_size_t ('w', &window);
 
-  v = vocab_new ();
+  v = vocab_open (vocab);
   if (v == NULL)
     fatal ("vocab_new");
-  if (vocab_load (v, vocab) != 0)
-    fatal ("vocab_load");
-
-  c = corpus_new (v);
-  if (c == NULL)
-    fatal ("corpus_new");
-  if (corpus_load (c, corpus) != 0)
-    fatal ("corpus_load");
 
   n = neural_network_new (v, layers, window);
   if (n == NULL)
     fatal ("neural_network_new");
 
-  for (i = 0; i < iterations; i++)
-    neural_network_train (n, c);
+  for (i = k; i < argc; i++) {
+    c = corpus_new (v);
+    if (c == NULL)
+      fatal ("corpus_new");
+    if (corpus_parse (c, argv[i]) != 0)
+      fatal ("corpus_parse");
+    for (j = 0; j < iterations; j++)
+      neural_network_train (n, c);
+    corpus_free (c);
+  }
 
   for (i = 0; i < 10; i++) {
     printf ("%s:\n", v->entries[i].word);
@@ -65,10 +65,12 @@ main (int argc, char **argv)
     putchar ('\n');
   }
 
-  if (neural_network_save (n, neuralnetwork) != 0)
-    fatal ("neural_network_save");
+  /**
+   * TODO: ...
+   * if (neural_network_save (n, neuralnetwork) != 0)
+   *   fatal ("neural_network_save");
+   */
 
-  corpus_free (c);
   neural_network_free (n);
   vocab_free (v);
   return 0;

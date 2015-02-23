@@ -10,6 +10,7 @@
 #include "log.h"
 #include "mem.h"
 #include "hash.h"
+#include "file.h"
 
 #include <string.h>
 
@@ -70,6 +71,55 @@ vocab_build (struct vocab *v)
     v->table[j % v->cap] = &v->entries[i];
   }
   return 0;
+}
+
+struct vocab *
+vocab_open (const char *path)
+{
+  struct vocab *v = NULL;
+  struct file *f = NULL;
+
+  f = file_open (path);
+  if (f == NULL)
+    return NULL;
+
+  v = mem_alloc (1, sizeof (struct vocab));
+  if (v == NULL)
+    goto error;
+  v->len = f->header.data[0];
+  if (vocab_alloc (v) != 0)
+    goto error;
+  if (file_read (f, v->entries, v->len * sizeof (struct vocab_entry)) != 0)
+    goto error;
+  if (vocab_build (v) != 0)
+    goto error;
+  file_close (f);
+  return v;
+error:
+  if (v)
+    vocab_free (v);
+  if (f)
+    file_close (f);
+  return NULL;
+}
+
+int
+vocab_save (struct vocab *v, const char *path)
+{
+  struct file *f = NULL;
+
+  f = file_create (path);
+  if (f == NULL)
+    return -1;
+  f->header.data[0] = v->len;
+  if (file_write (f, v->entries, v->len * sizeof (struct vocab_entry)) != 0)
+    goto error;
+  file_close (f);
+  return 0;
+error:
+  if (f)
+    file_close (f);
+  return -1;
 }
 
 static int
