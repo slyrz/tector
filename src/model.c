@@ -10,7 +10,7 @@
 #include "core/vocab.h"
 
 struct command command = {
-  .name = "train",
+  .name = "model",
   .opts = "ilnvw",
   .args = "TEXTFILE...",
 };

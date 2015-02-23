@@ -8,7 +8,7 @@ noinst_LIBRARIES = \
 
 bin_PROGRAMS = \
   filter \
-  train \
+  model \
   vocab
 
 libcore_a_SOURCES = \
@@ -29,7 +29,7 @@ libcore_a_SOURCES = \
 
 LDADD = libcore.a
 filter_SOURCES = src/filter.c
-train_SOURCES = src/train.c
+model_SOURCES = src/model.c
 vocab_SOURCES = src/vocab.c
 
 check_PROGRAMS = \
