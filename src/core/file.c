@@ -98,3 +98,31 @@ file_write (struct file *f, const void *buf, size_t size)
 {
   return -(write (f->fd, buf, size) != size);
 }
+
+int
+file_readstr (struct file *f, char *buf, size_t size)
+{
+  uint64_t len;
+
+  if (file_read (f, &len, sizeof (uint64_t)) != 0)
+    return -1;
+  if (len >= size)
+    return -1;
+  if (file_read (f, buf, len) != 0)
+    return -1;
+  buf[len] = '\0';
+  return 0;
+}
+
+int
+file_writestr (struct file *f, const char *buf)
+{
+  uint64_t len;
+
+  len = (uint64_t) strlen (buf);
+  if (file_write (f, &len, sizeof (uint64_t)) != 0)
+    return -1;
+  if (file_write (f, buf, len) != 0)
+    return -1;
+  return 0;
+}
