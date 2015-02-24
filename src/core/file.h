@@ -1,6 +1,8 @@
 #ifndef CORE_FILE_H
 #define CORE_FILE_H
 
+#include <unistd.h>
+
 struct file {
   int fd;
   int mode;
