@@ -11,10 +11,10 @@ struct file {
   } header;
 };
 
-struct file *file_open (const char*);
-struct file *file_create (const char*);
-void file_close (struct file*);
-int file_read (struct file*, void*, size_t);
-int file_write (struct file*, const void*, size_t);
+struct file *file_open (const char *);
+struct file *file_create (const char *);
+void file_close (struct file *);
+int file_read (struct file *, void *, size_t);
+int file_write (struct file *, const void *, size_t);
 
 #endif

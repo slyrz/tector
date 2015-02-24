@@ -15,7 +15,7 @@ static uint32_t
 header_checksum (struct file *f)
 {
   return hashptr ((void *) &f->header + sizeof (f->header.checksum),
-      sizeof (f->header) - sizeof (f->header.checksum));
+                  sizeof (f->header) - sizeof (f->header.checksum));
 }
 
 static int
@@ -41,7 +41,7 @@ file_new (const char *path, int mode)
   if (f == NULL)
     return NULL;
 
-  f->fd = open(path, mode, 0666);
+  f->fd = open (path, mode, 0666);
   if (f->fd == -1)
     goto error;
 
@@ -51,7 +51,8 @@ file_new (const char *path, int mode)
       goto error;
     if (f->header.checksum != header_checksum (f))
       goto error;
-  } else {
+  }
+  else {
     if (header_write (f) != 0)
       goto error;
   }
@@ -64,19 +65,19 @@ error:
 }
 
 struct file *
-file_open (const char* path)
+file_open (const char *path)
 {
-  return file_new(path, mode_read);
+  return file_new (path, mode_read);
 }
 
 struct file *
-file_create (const char* path)
+file_create (const char *path)
 {
-  return file_new(path, mode_write);
+  return file_new (path, mode_write);
 }
 
 void
-file_close (struct file* f)
+file_close (struct file *f)
 {
   if (f->mode == mode_write) {
     f->header.checksum = header_checksum (f);
@@ -87,12 +88,13 @@ file_close (struct file* f)
 }
 
 int
-file_read (struct file* f, void* buf, size_t size) {
+file_read (struct file *f, void *buf, size_t size)
+{
   return -(read (f->fd, buf, size) != size);
 }
 
 int
-file_write (struct file* f, const void* buf, size_t size) {
+file_write (struct file *f, const void *buf, size_t size)
+{
   return -(write (f->fd, buf, size) != size);
 }
-
