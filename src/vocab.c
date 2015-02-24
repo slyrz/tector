@@ -5,7 +5,6 @@
 #include "core/scanner.h"
 #include "core/vocab.h"
 #include "core/log.h"
-#include "core/serialize.h"
 
 struct command command = {
   .name = "vocab",
