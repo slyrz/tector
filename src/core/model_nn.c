@@ -69,8 +69,7 @@ nn_load (struct model *base, struct file *f)
       if (file_read (f, m->syn0 + j * base->size.layer, base->size.layer * sizeof (float)) != 0)
         goto error;
     }
-    else if (lseek (f->fd, (off_t) (base->size.layer * sizeof (float)), SEEK_CUR)
-             < 0)
+    else if (lseek (f->fd, (off_t) (base->size.layer * sizeof (float)), SEEK_CUR) < 0)
       goto error;
   }
   return 0;
