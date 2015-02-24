@@ -18,5 +18,6 @@ int file_read (struct file *, void *, size_t);
 int file_write (struct file *, const void *, size_t);
 int file_readstr (struct file *, char *, size_t);
 int file_writestr (struct file *, const char *);
+int file_skip (struct file *, off_t);
 
 #endif

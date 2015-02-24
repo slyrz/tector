@@ -126,3 +126,9 @@ file_writestr (struct file *f, const char *buf)
     return -1;
   return 0;
 }
+
+int
+file_skip (struct file *f, off_t off)
+{
+  return -(lseek (f->fd, off, SEEK_CUR) < 0);
+}
