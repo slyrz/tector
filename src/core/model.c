@@ -27,17 +27,14 @@ model_new (struct vocab *v, int type)
   m = mem_alloc (1, i->size);
   if (m == NULL)
     return NULL;
-
   m->i = i;
   m->v = v;
+  m->type = type;
   m->size.vocab = v->len;
   m->size.layer = 64;
   m->size.vector = 64;
   m->size.window = 5;
-
   if (m->i->init (m) != 0)
-    goto error;
-  if (m->i->alloc (m) != 0)
     goto error;
   return m;
 error:
@@ -60,11 +57,14 @@ model_open (struct vocab *v, const char *path)
   if (m == NULL)
     goto error;
   m->size.layer = f->header.data[0];
-  m->size.vector = f->header.data[1];   // TODO: ..
+  m->size.vector = f->header.data[1];
   m->size.vocab = f->header.data[2];
   m->size.window = f->header.data[3];
+  if (m->size.vocab != v->len)
+    goto error;
   if (m->i->alloc (m) != 0)
     goto error;
+  m->allocated = 1;
   if (m->i->load (m, f) != 0)
     goto error;
   file_close (f);
@@ -85,6 +85,7 @@ model_save (struct model *m, const char *path)
   f = file_create (path);
   if (f == NULL)
     goto error;
+  f->header.type = m->type;
   f->header.data[0] = m->size.layer;
   f->header.data[1] = m->size.vector;
   f->header.data[2] = m->size.vocab;
@@ -110,5 +111,10 @@ model_free (struct model *m)
 int
 model_train (struct model *m, struct corpus *c)
 {
+  if (!m->allocated) {
+    if (m->i->alloc (m) != 0)
+      return -1;
+    m->allocated = 1;
+  }
   return m->i->train (m, c);
 }

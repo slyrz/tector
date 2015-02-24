@@ -14,6 +14,8 @@ enum {
 struct model {
   const struct model_interface *i;
   struct vocab *v;
+  int type;
+  int allocated;
   struct {
     size_t layer;
     size_t vector;
