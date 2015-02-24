@@ -4,19 +4,18 @@
 #include "core/corpus.h"
 #include "core/filter.h"
 #include "core/log.h"
-#include "core/neural_network.h"
+#include "core/model.h"
 #include "core/options.h"
-#include "core/serialize.h"
 #include "core/vocab.h"
 
 struct command command = {
   .name = "model",
-  .opts = "ilnvw",
+  .opts = "ilvw",
   .args = "TEXTFILE...",
 };
 
-static const char *neuralnetwork = "neuralnetwork.bin";
 static const char *vocab = "vocab.bin";
+static const char *model = "model.bin";
 static size_t iterations = 10;
 static size_t layers = 50;
 static size_t window = 5;
@@ -25,7 +24,7 @@ int
 main (int argc, char **argv)
 {
   struct corpus *c;
-  struct neural_network *n;
+  struct model *m;
   struct vocab *v;
 
   int i;
@@ -33,7 +32,7 @@ main (int argc, char **argv)
   int k;
 
   k = options_parse (argc, argv);
-  options_get_str ('n', &neuralnetwork);
+  options_get_str ('n', &model);
   options_get_str ('v', &vocab);
   options_get_size_t ('i', &iterations);
   options_get_size_t ('l', &layers);
@@ -47,31 +46,36 @@ main (int argc, char **argv)
   if (c == NULL)
     fatal ("corpus_new");
 
-  for (i = k; i < argc; i++)
+  for (i = k + 1; i < argc; i++)
     if (corpus_parse (c, argv[i]) != 0)
       fatal ("corpus_parse");
 
-  n = neural_network_new (v, layers, window);
-  if (n == NULL)
-    fatal ("neural_network_new");
+  m = model_new (v, MODEL_NN);
+  if (m == NULL)
+    fatal ("model_new");
 
   for (j = 0; j < iterations; j++)
-    neural_network_train (n, c);
+    model_train (m, c);
 
-  for (i = 0; i < 10; i++) {
-    printf ("%s:\n", v->entries[i].word);
-    for (j = 0; j < n->size.layer; j++)
-      printf ("%f ", (double) n->syn0[i * n->size.layer + j]);
-    putchar ('\n');
-  }
+  if (model_save (m, model) != 0)
+    fatal ("model_save");
+
+  /*
+     for (i = 0; i < 10; i++) {
+     printf ("%s:\n", v->entries[i].word);
+     for (j = 0; j < n->size.layer; j++)
+     printf ("%f ", (double) n->syn0[i * n->size.layer + j]);
+     putchar ('\n');
+     }
+   */
 
   /**
    * TODO: ...
-   * if (neural_network_save (n, neuralnetwork) != 0)
+   * if (neural_network_save (n, model) != 0)
    *   fatal ("neural_network_save");
    */
 
-  neural_network_free (n);
+  model_free (m);
   corpus_free (c);
   vocab_free (v);
   return 0;

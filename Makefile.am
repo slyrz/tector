@@ -18,7 +18,8 @@ libcore_a_SOURCES = \
   src/core/filter.c \
   src/core/hash.c \
   src/core/mem.c \
-  src/core/neural_network.c \
+  src/core/model.c \
+  src/core/model_nn.c \
   src/core/ngram.c \
   src/core/options.c \
   src/core/scanner.c \
