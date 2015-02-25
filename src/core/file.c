@@ -14,8 +14,7 @@ const int mode_write = O_WRONLY | O_CREAT | O_TRUNC;
 static uint32_t
 header_checksum (struct file *f)
 {
-  return hashptr ((void *) &f->header + sizeof (f->header.checksum),
-                  sizeof (f->header) - sizeof (f->header.checksum));
+  return hashptr ((void *) &f->header + sizeof (f->header.checksum), sizeof (f->header) - sizeof (f->header.checksum));
 }
 
 static int
@@ -90,13 +89,13 @@ file_close (struct file *f)
 int
 file_read (struct file *f, void *buf, size_t size)
 {
-  return -(read (f->fd, buf, size) != size);
+  return -(read (f->fd, buf, size) != (ssize_t) size);
 }
 
 int
 file_write (struct file *f, const void *buf, size_t size)
 {
-  return -(write (f->fd, buf, size) != size);
+  return -(write (f->fd, buf, size) != (ssize_t) size);
 }
 
 int
