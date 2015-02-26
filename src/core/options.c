@@ -54,23 +54,13 @@ val (int c)
 static int
 uninitialized (const struct command *c)
 {
-  static struct command e = { NULL, NULL, NULL, NULL };
-  return (memcmp (c, &e, sizeof (struct command)) == 0);
-}
-
-static int
-minargs (const struct command *c)
-{
-  char *s;
+  char *p = (char *) c;
   int i;
 
-  s = c->args;
-  if (s == NULL)
-    return 0;
-  i = 1;
-  while (*s)
-    i += (*s++ == ' ');
-  return i;
+  for (i = 0; i < sizeof (struct command); i++)
+    if (p[i] != 0)
+      return 0;
+  return 1;
 }
 
 static void
@@ -223,30 +213,21 @@ options_parse (int argc, char **argv)
   const struct command *c;
   int i;
 
-  if (argc <= 1)
-    goto error;
-
   /**
    * Find the command whose name matches the first argument or the first
    * command with unspecified name.
    */
-  i = 0;
-  for (;;) {
-    c = &program.commands[i++];
-    if (c->name == NULL)
+  c = program.commands;
+  while (c->name) {
+    if ((argv[1]) && (strcmp (c->name, argv[1]) == 0))
       break;
-    if (strcmp (c->name, argv[1]) == 0)
-      break;
+    c++;
   }
   if (uninitialized (c))
     goto error;
 
   // Always parse options, so that every command can handle -h.
   i = parse (c, argc, argv);
-
-  if ((argc - i) < minargs (c))
-    goto error;
-
   if (c->main)
     exit (c->main (argc - i, argv + i));
   return i;
