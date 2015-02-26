@@ -7,7 +7,7 @@
 
 struct program program = {
   .name = "filter",
-  .info = "cleans text, peforms stemming stopword removal",
+  .info = "cleans text, peforms stemming and stopword removal",
   .commands = {
     { .args = "TEXTFILE..." },
     { NULL },
