@@ -24,7 +24,7 @@ main (int argc, char **argv)
 
   k = options_parse (argc, argv);
   for (i = k; i < argc; i++) {
-    s = scanner_new (argv[i]);
+    s = scanner_open (argv[i]);
     if (s == NULL) {
       error ("scanner_new (%s)", argv[i]);
       continue;

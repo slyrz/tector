@@ -10,7 +10,8 @@ struct scanner {
   unsigned char data[8192];
 };
 
-struct scanner *scanner_new (const char *path);
+struct scanner *scanner_new (int fd);
+struct scanner *scanner_open (const char *path);
 void scanner_free (struct scanner *s);
 
 int scanner_rewind (struct scanner *s);

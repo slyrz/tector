@@ -55,21 +55,26 @@ peek (struct scanner *s)
 }
 
 struct scanner *
-scanner_new (const char *path)
+scanner_new (int fd)
 {
   struct scanner *s;
 
   s = mem_alloc (sizeof (struct scanner), 1);
   if (s == NULL)
-    goto error;
-  s->fd = open (path, O_RDONLY);
-  if (s->fd < 0)
-    goto error;
+    return NULL;
+  s->fd = fd;
   return s;
-error:
-  if (s)
-    scanner_free (s);
-  return NULL;
+}
+
+struct scanner *
+scanner_open (const char *path)
+{
+  int fd;
+
+  fd = open (path, O_RDONLY);
+  if (fd < 0)
+    return NULL;
+  return scanner_new (fd);
 }
 
 void

@@ -126,7 +126,7 @@ corpus_parse (struct corpus *c, const char *path)
   struct scanner *s;
   char b[8192] = { 0 };
 
-  s = scanner_new (path);
+  s = scanner_open (path);
   if (s == NULL)
     return -1;
 

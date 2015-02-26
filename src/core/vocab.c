@@ -139,7 +139,7 @@ vocab_parse (struct vocab *v, const char *path)
   char b[8192] = { 0 };
   int r = 0;
 
-  s = scanner_new (path);
+  s = scanner_open (path);
   if (s == NULL)
     return -1;
   while (scanner_readline (s, b, sizeof (b)) >= 0) {
