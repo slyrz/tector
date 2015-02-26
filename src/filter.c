@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <unistd.h>
 
 #include "core/options.h"
 #include "core/scanner.h"
@@ -14,27 +15,34 @@ struct program program = {
   },
 };
 
+static int
+run_filter (struct scanner *s)
+{
+  char b[8192] = { 0 };
+
+  if (s == NULL)
+    return -1;
+
+  while (scanner_readline (s, b, sizeof (b)) >= 0) {
+    filter (b);
+    if (*b)
+      puts (b);
+  }
+  scanner_free (s);
+  return 0;
+}
+
 int
 main (int argc, char **argv)
 {
-  struct scanner *s;
-  char b[8192] = { 0 };
   int i;
   int k;
 
   k = options_parse (argc, argv);
-  for (i = k; i < argc; i++) {
-    s = scanner_open (argv[i]);
-    if (s == NULL) {
-      error ("scanner_new (%s)", argv[i]);
-      continue;
-    }
-    while (scanner_readline (s, b, sizeof (b)) >= 0) {
-      filter (b);
-      if (*b)
-        puts (b);
-    }
-    scanner_free (s);
-  }
+  if (k == argc)
+    run_filter (scanner_new (STDIN_FILENO));
+  for (i = k; i < argc; i++)
+    if (run_filter (scanner_open (argv[i])) != 0)
+      error ("failed to open '%s'", argv[i]);
   return 0;
 }
