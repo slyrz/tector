@@ -8,10 +8,19 @@
 #include "core/options.h"
 #include "core/vocab.h"
 
-struct command command = {
+static int create (int argc, char **argv);
+static int train (int argc, char **argv);
+static int generate (int argc, char **argv);
+
+struct program program = {
   .name = "model",
-  .opts = "ilvw",
-  .args = "TEXTFILE...",
+  .info = "manage language models",
+  .commands = {
+    { .name = "create", .args = "MODEL", .opts = "ilvw", .main = create },
+    { .name = "train", .args = "MODEL TEXTFILE...", .main = train },
+    { .name = "generate", .args = "MODEL", .main = generate },
+    { NULL },
+  },
 };
 
 static const char *vocab = "vocab.bin";
@@ -19,6 +28,24 @@ static const char *model = "model.bin";
 static size_t iterations = 10;
 static size_t layers = 50;
 static size_t window = 5;
+
+static int
+create (int argc, char **argv)
+{
+  puts ("model_create");
+}
+
+static int
+train (int argc, char **argv)
+{
+  puts ("train");
+}
+
+static int
+generate (int argc, char **argv)
+{
+  puts ("generate");
+}
 
 int
 main (int argc, char **argv)

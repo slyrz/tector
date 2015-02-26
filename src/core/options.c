@@ -9,7 +9,7 @@
 #include <stdint.h>
 #include <limits.h>
 
-extern struct command command;
+extern struct program program;
 
 #define makeoption(c,n,a) \
   [(c) - 'a'] = {n, a, NULL, c}
@@ -51,8 +51,30 @@ val (int c)
   return values[idx (c)];
 }
 
+static int
+uninitialized (const struct command *c)
+{
+  static struct command e = { NULL, NULL, NULL, NULL };
+  return (memcmp (c, &e, sizeof (struct command)) == 0);
+}
+
+static int
+minargs (const struct command *c)
+{
+  char *s;
+  int i;
+
+  s = c->args;
+  if (s == NULL)
+    return 0;
+  i = 1;
+  while (*s)
+    i += (*s++ == ' ');
+  return i;
+}
+
 static void
-print_option (const struct option *opt)
+print_option (FILE * stream, const struct option *o)
 {
   const char *arg[] = {
     [no_argument] = "",
@@ -60,15 +82,51 @@ print_option (const struct option *opt)
     [required_argument] = "<ARG>",
   };
 
-  fprintf (stderr, "   -%c, --%s %s\n", opt->val, opt->name, arg[opt->has_arg]);
+  fprintf (stream, "   -%c, --%s %s\n", o->val, o->name, arg[o->has_arg]);
 }
 
 static void
-print_usage_and_exit (struct option *longopts)
+print_command (FILE * stream, const struct command *c)
 {
-  fprintf (stderr, "%s [OPTION...] %s\n\nOption:\n", command.name, command.args ? command.args : "");
-  while (longopts->name)
-    print_option (longopts++);
+  fprintf (stream, "\t%s", program.name);
+  if (c->name)
+    fprintf (stream, " %s", c->name);
+  if (c->opts)
+    fprintf (stream, " [-%s]", c->opts);
+  if (c->args)
+    fprintf (stream, " %s", c->args);
+  fputc ('\n', stream);
+}
+
+static void
+print_usage_and_exit (FILE * stream, const struct command *c, struct option *o)
+{
+  int i;
+
+  fprintf (stream, "%s", program.name);
+  if (program.info)
+    fprintf (stream, " - %s\n", program.info);
+  else
+    fputc ('\n', stream);
+  fprintf (stream, "\nUsage:\n");
+
+  if (c != NULL) {
+    print_command (stream, c);
+  }
+  else {
+    i = 0;
+    for (;;) {
+      if (uninitialized (program.commands + i))
+        break;
+      print_command (stream, program.commands + i);
+      i++;
+    }
+  }
+  if (o) {
+    fprintf (stream, "\nOptions:\n");
+    while (o->name)
+      print_option (stream, o++);
+  }
   exit (0);
 }
 
@@ -94,20 +152,25 @@ append (char *shortopts, struct option *longopts, const struct option *src)
   *shortopts = '\0';
 }
 
-int
-options_parse (int argc, char **argv)
+static int
+parse (const struct command *c, int argc, char **argv)
 {
-  const char *optstring = command.opts;
+  const char *optstring;
 
   char shortopts[64];
   struct option longopts[32];
 
   unsigned int b = 0;
   int i = 0;
-  int c = 0;
+  int v = 0;
 
   memset (shortopts, 0, sizeof (shortopts));
   memset (longopts, 0, sizeof (longopts));
+
+  if (c->opts)
+    optstring = c->opts;
+  else
+    optstring = "";
 
   /**
    * Bucket sort options. Avoids adding the same option multiple times.
@@ -129,23 +192,67 @@ options_parse (int argc, char **argv)
   }
   append (shortopts, longopts, options + idx ('h'));
 
+  /**
+   * This trickery lets getopt start parsing flags after the command name,
+   * otherwise getopt would stops parsing immediately.
+   */
+  optind = 1;
+  if (c->name != NULL)
+    optind++;
+
   i = 0;
   for (;;) {
-    c = getopt_long (argc, argv, shortopts, longopts, &i);
-    if ((c < 0) || (c == 'h') || (c == '?'))
+    v = getopt_long (argc, argv, shortopts, longopts, &i);
+    if ((v < 0) || (v == 'h') || (v == '?'))
       break;
     /**
      * If the option has no argument, set the value to an empty string,
      * so that the non-NULL value tells us that the option was present.
      */
-    values[idx (c)] = optarg ? optarg : "";
+    values[idx (v)] = optarg ? optarg : "";
   }
   values[31] = NULL;
-
-  if (c > 0)
-    print_usage_and_exit (longopts);
-
+  if (v > 0)
+    print_usage_and_exit (stdout, c, longopts);
   return optind;
+}
+
+int
+options_parse (int argc, char **argv)
+{
+  const struct command *c;
+  int i;
+
+  if (argc <= 1)
+    goto error;
+
+  /**
+   * Find the command whose name matches the first argument or the first
+   * command with unspecified name.
+   */
+  i = 0;
+  for (;;) {
+    c = &program.commands[i++];
+    if (c->name == NULL)
+      break;
+    if (strcmp (c->name, argv[1]) == 0)
+      break;
+  }
+  if (uninitialized (c))
+    goto error;
+
+  // Always parse options, so that every command can handle -h.
+  i = parse (c, argc, argv);
+
+  if ((argc - i) < minargs (c))
+    goto error;
+
+  if (c->main)
+    exit (c->main (argc - i, argv + i));
+  return i;
+error:
+  print_usage_and_exit (stderr, NULL, NULL);
+  return -1;
 }
 
 void
@@ -181,7 +288,7 @@ options_get_int (char c, int *r)
 }
 
 void
-options_get_size_t (char c, size_t *r)
+options_get_size_t (char c, size_t * r)
 {
   if (val (c) == NULL)
     return;

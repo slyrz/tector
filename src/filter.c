@@ -5,10 +5,13 @@
 #include "core/filter.h"
 #include "core/log.h"
 
-struct command command = {
+struct program program = {
   .name = "filter",
-  .args = "TEXTFILE...",
-  .opts = "",
+  .info = "cleans text, peforms stemming stopword removal",
+  .commands = {
+    { .args = "TEXTFILE..." },
+    { NULL },
+  },
 };
 
 int

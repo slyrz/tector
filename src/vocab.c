@@ -6,10 +6,13 @@
 #include "core/vocab.h"
 #include "core/log.h"
 
-struct command command = {
+struct program program = {
   .name = "vocab",
-  .args = "TEXTFILE...",
-  .opts = "vm",
+  .info = "manage vocabularies",
+  .commands = {
+    { .opts = "vm", .args = "TEXTFILE..." },
+    { NULL },
+  },
 };
 
 static const char *vocab = "vocab.bin";
