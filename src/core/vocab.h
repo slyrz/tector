@@ -28,6 +28,7 @@ struct vocab_entry {
 };
 
 struct vocab {
+  size_t min;
   size_t cap;
   size_t len;
   struct vocab_entry **table;
@@ -43,7 +44,7 @@ int vocab_build (struct vocab *v);
 int vocab_parse (struct vocab *v, const char *path);
 int vocab_add (struct vocab *v, const char *w);
 int vocab_find (struct vocab *v, const char *w, size_t *p);
-int vocab_shrink (struct vocab *v, int min);
+int vocab_shrink (struct vocab *v);
 int vocab_encode (struct vocab *v);
 uint32_t vocab_id (struct vocab *v);
 

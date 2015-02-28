@@ -36,11 +36,6 @@ main (int argc, char **argv)
   for (i = k; i < argc; i++)
     vocab_parse (v, argv[i]);
 
-  info ("vocab contains %zu words", v->len);
-  vocab_shrink (v, mincount);
-  info ("vocab shrinked to %zu words", v->len);
-
-  vocab_encode (v);
   vocab_save (v, vocab);
   vocab_free (v);
   return 0;

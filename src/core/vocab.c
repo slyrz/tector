@@ -24,6 +24,7 @@ vocab_new (void)
     goto error;
   if (vocab_alloc (v) != 0)
     goto error;
+  v->min = 10;
   return v;
 error:
   if (v)
@@ -108,6 +109,10 @@ vocab_save (struct vocab *v, const char *path)
 {
   struct file *f = NULL;
 
+  if (vocab_shrink (v) != 0)
+    return -1;
+  if (vocab_encode (v) != 0)
+    return -1;
   f = file_create (path);
   if (f == NULL)
     return -1;
@@ -172,13 +177,11 @@ cmp (const void *a, const void *b)
 }
 
 int
-vocab_shrink (struct vocab *v, int min)
+vocab_shrink (struct vocab *v)
 {
-  if (min <= 0)
-    return 0;
   qsort (v->entries, v->len, sizeof (struct vocab_entry), cmp);
   while (v->len > 0) {
-    if (v->entries[v->len - 1].count >= (uint32_t) min)
+    if (v->entries[v->len - 1].count >= (uint32_t) v->min)
       break;
     v->len--;
   }
