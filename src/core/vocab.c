@@ -88,6 +88,7 @@ vocab_open (const char *path)
   if (v == NULL)
     goto error;
   v->len = f->header.data[0];
+  v->min = f->header.data[1];
   if (vocab_alloc (v) != 0)
     goto error;
   if (file_read (f, v->entries, v->len * sizeof (struct vocab_entry)) != 0)
@@ -117,6 +118,7 @@ vocab_save (struct vocab *v, const char *path)
   if (f == NULL)
     return -1;
   f->header.data[0] = v->len;
+  f->header.data[1] = v->min;
   if (file_write (f, v->entries, v->len * sizeof (struct vocab_entry)) != 0)
     goto error;
   file_close (f);
