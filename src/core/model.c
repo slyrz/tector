@@ -52,7 +52,6 @@ model_open (struct vocab *v, const char *path)
   f = file_open (path);
   if (f == NULL)
     goto error;
-
   m = model_new (v, f->header.type);
   if (m == NULL)
     goto error;
@@ -77,11 +76,24 @@ error:
   return NULL;
 }
 
+static int
+alloc_once (struct model *m)
+{
+  if (!m->allocated) {
+   if (m->i->alloc (m) != 0)
+      return -1;
+    m->allocated = 1;
+  }
+  return 0;
+}
+
 int
 model_save (struct model *m, const char *path)
 {
   struct file *f = NULL;
 
+  if (alloc_once (m) != 0)
+    return -1;
   f = file_create (path);
   if (f == NULL)
     goto error;
@@ -103,18 +115,15 @@ error:
 void
 model_free (struct model *m)
 {
-  m->i->free (m);
+  if (m->allocated)
+    m->i->free (m);
   mem_free (m);
-  return;
 }
 
 int
 model_train (struct model *m, struct corpus *c)
 {
-  if (!m->allocated) {
-    if (m->i->alloc (m) != 0)
-      return -1;
-    m->allocated = 1;
-  }
+  if (alloc_once (m) != 0)
+    return -1;
   return m->i->train (m, c);
 }
