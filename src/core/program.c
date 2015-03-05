@@ -1,4 +1,4 @@
-#include "options.h"
+#include "program.h"
 #include "string.h"
 
 #include <errno.h>
@@ -26,12 +26,26 @@ static struct option options[32] = {
   makeoption ('w', "window", required_argument),
 };
 
-/**
- * This array stores the optargs of the parsed options. Active options without
- * argument will have the empty string as their value. If the option wasn't
- * present, the value will be NULL.
- */
-static const char *values[32];
+struct state {
+  /**
+   * The active command.
+   */
+  const struct command *command;
+  /**
+   * argc and argv values after parsing, pointing to the first argument that
+   * isn't the command name or an option.
+   */
+  int argc;
+  char **argv;
+  /**
+   * The value array stores the values of the parsed options.
+   * If an options is passed without argument, it will have the empty string as
+   * its value. If the option wasn't present, the value will be NULL.
+   */
+  char *values[32];
+};
+
+static struct state state;
 
 /**
  * The index of options is the alphabetical index of the option's
@@ -48,9 +62,13 @@ idx (int c)
 static const char *
 val (int c)
 {
-  return values[idx (c)];
+  return state.values[idx (c)];
 }
 
+/**
+ * A command is uninitialized if its memory is all zero. This has to apply for
+ * the last element in the program.commands array.
+ */
 static int
 uninitialized (const struct command *c)
 {
@@ -199,79 +217,68 @@ parse (const struct command *c, int argc, char **argv)
      * If the option has no argument, set the value to an empty string,
      * so that the non-NULL value tells us that the option was present.
      */
-    values[idx (v)] = optarg ? optarg : "";
+    state.values[idx (v)] = optarg ? optarg : "";
   }
-  values[31] = NULL;
+  state.values[31] = NULL;
   if (v > 0)
     print_usage_and_exit (stdout, c, longopts);
   return optind;
 }
 
 int
-options_parse (int argc, char **argv)
+program_parseargs (int argc, char **argv)
 {
-  const struct command *c;
-  int i;
+  int n;
+
+  memset (&state, 0, sizeof (struct state));
 
   /**
    * Find the command whose name matches the first argument or the first
    * command with unspecified name.
    */
-  c = program.commands;
-  while (c->name) {
-    if ((argv[1]) && (strcmp (c->name, argv[1]) == 0))
+  state.command = program.commands;
+  while (state.command->name) {
+    if ((argv[1]) && (strcmp (state.command->name, argv[1]) == 0))
       break;
-    c++;
+    state.command++;
   }
-  if (uninitialized (c))
+  if (uninitialized (state.command))
     goto error;
 
-  // Always parse options, so that every command can handle -h.
-  i = parse (c, argc, argv);
-  if (c->main)
-    exit (c->main (argc - i, argv + i));
-  return i;
+  n = parse (state.command, argc, argv);
+  if (n > 0) {
+    state.argc = argc - n;
+    state.argv = argv + n;
+  }
+  return n;
 error:
   print_usage_and_exit (stderr, NULL, NULL);
-  return -1;
+  return 0;
 }
 
 void
-options_get_str (char c, const char **r)
+program_run (void)
 {
-  if (val (c) == NULL)
-    return;
-  *r = val (c);
+  if ((state.command) && (state.command->main))
+    state.command->main (state.argc, state.argv);
 }
 
 void
-options_get_bool (char c, int *r)
+program_getoptstr (char c, const char **r)
+{
+  if (val (c))
+    *r = val (c);
+}
+
+void
+program_getoptbool (char c, int *r)
 {
   *r = (val (c) != NULL);
 }
 
-#define parseint(s,o,t,m) \
-  do { \
-    char *e; \
-    unsigned long v; \
-    errno = 0; \
-    v = strtoul (s, &e, 10); \
-    if ((errno == 0) && (*e == '\0') && (v <= (m))) \
-      (o) = (t) v; \
-  } while (0)
-
 void
-options_get_int (char c, int *r)
+program_getoptint (char c, int *r)
 {
-  if (val (c) == NULL)
-    return;
-  parseint (val (c), *r, int, INT_MAX);
-}
-
-void
-options_get_size_t (char c, size_t * r)
-{
-  if (val (c) == NULL)
-    return;
-  parseint (val (c), *r, size_t, SIZE_MAX);
+  if (val (c))
+    *r = atoi (val (c));
 }

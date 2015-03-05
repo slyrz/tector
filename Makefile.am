@@ -21,7 +21,7 @@ libcore_a_SOURCES = \
   src/core/model.c \
   src/core/model_nn.c \
   src/core/ngram.c \
-  src/core/options.c \
+  src/core/program.c \
   src/core/scanner.c \
   src/core/stem.c \
   src/core/stopwords.c \
