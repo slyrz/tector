@@ -12,6 +12,7 @@ bin_PROGRAMS = \
   vocab
 
 libcore_a_SOURCES = \
+  src/core/bundle.c \
   src/core/corpus.c \
   src/core/exp.c \
   src/core/file.c \
