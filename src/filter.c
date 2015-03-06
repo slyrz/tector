@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "core/options.h"
-#include "core/scanner.h"
+#include "core/program.h"
 #include "core/filter.h"
 #include "core/log.h"
+#include "core/scanner.h"
 
 struct program program = {
   .name = "filter",
@@ -16,13 +16,12 @@ struct program program = {
 };
 
 static int
-run_filter (struct scanner *s)
+filter_lines (struct scanner *s)
 {
   char b[8192] = { 0 };
 
   if (s == NULL)
     return -1;
-
   while (scanner_readline (s, b, sizeof (b)) >= 0) {
     filter (b);
     if (*b)
@@ -36,13 +35,13 @@ int
 main (int argc, char **argv)
 {
   int i;
-  int k;
 
-  k = options_parse (argc, argv);
-  if (k == argc)
-    run_filter (scanner_new (STDIN_FILENO));
-  for (i = k; i < argc; i++)
-    if (run_filter (scanner_open (argv[i])) != 0)
+  program_init (argc, argv);
+  if (argc == 0)
+    filter_lines (scanner_new (STDIN_FILENO));
+  for (i = 0; i < argc; i++) {
+    if (filter_lines (scanner_open (argv[i])) != 0)
       error ("failed to open '%s'", argv[i]);
+  }
   return 0;
 }

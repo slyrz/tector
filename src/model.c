@@ -1,47 +1,64 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "core/corpus.h"
-#include "core/filter.h"
+#include "core/program.h"
+#include "core/bundle.h"
 #include "core/log.h"
 #include "core/model.h"
-#include "core/options.h"
-#include "core/vocab.h"
 
-static int create (int argc, char **argv);
-static int train (int argc, char **argv);
-static int generate (int argc, char **argv);
+static void create (int argc, char **argv);
+static void train (int argc, char **argv);
+static void generate (int argc, char **argv);
 
 struct program program = {
   .name = "model",
   .info = "manage language models",
   .commands = {
-    { .name = "create", .args = "MODEL", .opts = "ilvw", .main = create },
-    { .name = "train", .args = "MODEL TEXTFILE...", .main = train },
-    { .name = "generate", .args = "MODEL", .main = generate },
+    { .name = "create", .args = "DIR", .opts = "ilvw", .main = create },
+    { .name = "train", .args = "DIR TEXTFILE...", .main = train },
+    { .name = "generate", .args = "DIR", .main = generate },
     { NULL },
   },
 };
 
-static const char *vocab = "vocab.bin";
-static const char *model = "model.bin";
-static size_t iterations = 10;
-static size_t layers = 50;
-static size_t window = 5;
+static struct bundle *b;
+static int iterations = 10;
+static int layer = 50;
+static int vector = 50;
+static int window = 5;
 
-static int
+static void
 create (int argc, char **argv)
 {
-  puts ("model_create");
+  if (b->model)
+    fatal ("model exists");
+  b->model = model_new (b->vocab, MODEL_NN);
+  if (b->model == NULL)
+    fatal ("model_new");
+  b->model->size.layer = layer;
+  b->model->size.vector = vector;
+  b->model->size.window = window;
 }
 
-static int
+static void
 train (int argc, char **argv)
 {
-  puts ("train");
+  struct corpus *c;
+  int i;
+
+  if (b->model == NULL)
+    fatal ("model missing");
+  c = corpus_new (b->vocab);
+  if (c == NULL)
+    fatal ("corpus_new");
+  for (i = 0; i < argc; i++)
+    if (corpus_parse (c, argv[i]) != 0)
+      fatal ("corpus_parse");
+  if (model_train (b->model, c) != 0)
+    fatal ("model_train");
 }
 
-static int
+static void
 generate (int argc, char **argv)
 {
   puts ("generate");
@@ -50,60 +67,16 @@ generate (int argc, char **argv)
 int
 main (int argc, char **argv)
 {
-  struct corpus *c;
-  struct model *m;
-  struct vocab *v;
+  program_init (argc, argv);
+  program_getoptint ('i', &iterations);
+  program_getoptint ('l', &layer);
+  program_getoptint ('w', &window);
 
-  int i;
-  int j;
-  int k;
-
-  k = options_parse (argc, argv);
-  options_get_str ('n', &model);
-  options_get_str ('v', &vocab);
-  options_get_size_t ('i', &iterations);
-  options_get_size_t ('l', &layers);
-  options_get_size_t ('w', &window);
-
-  v = vocab_open (vocab);
-  if (v == NULL)
-    fatal ("vocab_new");
-
-  c = corpus_new (v);
-  if (c == NULL)
-    fatal ("corpus_new");
-
-  for (i = k + 1; i < argc; i++)
-    if (corpus_parse (c, argv[i]) != 0)
-      fatal ("corpus_parse");
-
-  m = model_new (v, MODEL_NN);
-  if (m == NULL)
-    fatal ("model_new");
-
-  for (j = 0; j < iterations; j++)
-    model_train (m, c);
-
-  if (model_save (m, model) != 0)
-    fatal ("model_save");
-
-  /*
-     for (i = 0; i < 10; i++) {
-     printf ("%s:\n", v->entries[i].word);
-     for (j = 0; j < n->size.layer; j++)
-     printf ("%f ", (double) n->syn0[i * n->size.layer + j]);
-     putchar ('\n');
-     }
-   */
-
-  /**
-   * TODO: ...
-   * if (neural_network_save (n, model) != 0)
-   *   fatal ("neural_network_save");
-   */
-
-  model_free (m);
-  corpus_free (c);
-  vocab_free (v);
+  b = bundle_open (argv[0]);
+  if (b == NULL)
+    fatal ("bundle_open");
+  program_run ();
+  bundle_save (b);
+  bundle_free (b);
   return 0;
 }
