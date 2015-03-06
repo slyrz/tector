@@ -28,6 +28,7 @@ void corpus_free (struct corpus *c);
 
 int corpus_alloc (struct corpus *c);
 int corpus_build (struct corpus *c);
+int corpus_clear (struct corpus *c);
 int corpus_parse (struct corpus *c, const char *path);
 
 #endif

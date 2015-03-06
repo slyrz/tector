@@ -64,6 +64,14 @@ corpus_build (struct corpus *c)
 }
 
 int
+corpus_clear (struct corpus *c)
+{
+  c->sentences.len = 0;
+  c->words.len = 0;
+  return 0;
+}
+
+int
 corpus_alloc (struct corpus *c)
 {
   const size_t s = reqcap (c->sentences.len, c->sentences.cap, 1024);
