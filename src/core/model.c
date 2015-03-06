@@ -10,6 +10,17 @@
 
 extern struct model_interface interface_nn;
 
+static int
+model_alloc (struct model *m)
+{
+  if (!m->state.allocated) {
+    if (m->i->alloc (m) != 0)
+      return -1;
+    m->state.allocated = 1;
+  }
+  return 0;
+}
+
 struct model *
 model_new (struct vocab *v, int type)
 {
@@ -36,6 +47,7 @@ model_new (struct vocab *v, int type)
   m->size.window = 5;
   if (m->i->init (m) != 0)
     goto error;
+  m->state.changed = 1;
   return m;
 error:
   if (m)
@@ -61,12 +73,12 @@ model_open (struct vocab *v, const char *path)
   m->size.window = f->header.data[3];
   if (m->size.vocab != v->len)
     goto error;
-  if (m->i->alloc (m) != 0)
+  if (model_alloc (m) != 0)
     goto error;
-  m->allocated = 1;
   if (m->i->load (m, f) != 0)
     goto error;
   file_close (f);
+  m->state.changed = 0;
   return m;
 error:
   if (m)
@@ -76,23 +88,14 @@ error:
   return NULL;
 }
 
-static int
-alloc_once (struct model *m)
-{
-  if (!m->allocated) {
-   if (m->i->alloc (m) != 0)
-      return -1;
-    m->allocated = 1;
-  }
-  return 0;
-}
-
 int
 model_save (struct model *m, const char *path)
 {
   struct file *f = NULL;
 
-  if (alloc_once (m) != 0)
+  if (!m->state.changed)
+    return 0;
+  if (model_alloc (m) != 0)
     return -1;
   f = file_create (path);
   if (f == NULL)
@@ -105,6 +108,7 @@ model_save (struct model *m, const char *path)
   if (m->i->save (m, f) != 0)
     goto error;
   file_close (f);
+  m->state.changed = 0;
   return 0;
 error:
   if (f)
@@ -115,7 +119,7 @@ error:
 void
 model_free (struct model *m)
 {
-  if (m->allocated)
+  if (m->state.allocated)
     m->i->free (m);
   mem_free (m);
 }
@@ -123,7 +127,8 @@ model_free (struct model *m)
 int
 model_train (struct model *m, struct corpus *c)
 {
-  if (alloc_once (m) != 0)
+  if (model_alloc (m) != 0)
     return -1;
+  m->state.changed = 1;
   return m->i->train (m, c);
 }

@@ -15,13 +15,17 @@ struct model {
   const struct model_interface *i;
   struct vocab *v;
   int type;
-  int allocated;
   struct {
+    size_t iter;
     size_t layer;
     size_t vector;
     size_t vocab;
     size_t window;
   } size;
+  struct {
+    unsigned allocated:1;
+    unsigned changed:1;
+  } state;
 };
 
 struct model_interface {
