@@ -14,7 +14,7 @@ struct program program = {
   .name = "model",
   .info = "manage language models",
   .commands = {
-    { .name = "create", .args = "DIR", .opts = "ilvw", .main = create },
+    { .name = "create", .args = "DIR", .opts = "ilw", .main = create },
     { .name = "train", .args = "DIR TEXTFILE...", .main = train },
     { .name = "generate", .args = "DIR", .main = generate },
     { NULL },

@@ -15,14 +15,10 @@ extern struct program program;
   [(c) - 'a'] = {n, a, NULL, c}
 
 static struct option options[32] = {
-  makeoption ('c', "corpus", required_argument),
   makeoption ('h', "help", no_argument),
   makeoption ('i', "iterations", required_argument),
   makeoption ('l', "layers", required_argument),
   makeoption ('m', "mincount", required_argument),
-  makeoption ('n', "neuralnetwork", required_argument),
-  makeoption ('r', "rebuild", no_argument),
-  makeoption ('v', "vocab", required_argument),
   makeoption ('w', "window", required_argument),
 };
 
