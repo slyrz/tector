@@ -26,6 +26,7 @@ struct model {
     unsigned allocated:1;
     unsigned changed:1;
   } state;
+  float *embeddings;
 };
 
 struct model_interface {
@@ -36,6 +37,7 @@ struct model_interface {
   int (*train) (struct model *, struct corpus *);
   int (*load) (struct model *, struct file *);
   int (*save) (struct model *, struct file *);
+  int (*generate) (struct model *);
 };
 
 struct model *model_new (struct vocab *, int);
@@ -44,5 +46,6 @@ void model_free (struct model *);
 
 int model_save (struct model *, const char *);
 int model_train (struct model *, struct corpus *);
+int model_generate (struct model *);
 
 #endif

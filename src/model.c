@@ -64,7 +64,23 @@ train (int argc, char **argv)
 static void
 generate (int argc, char **argv)
 {
-  puts ("generate");
+  size_t n;
+  size_t i;
+  size_t j;
+
+  if (b->model == NULL)
+    fatal ("model missing");
+
+  if (model_generate (b->model) != 0)
+    fatal ("model_generate");
+
+  n = b->model->size.vector;
+  for (i = 0; i < b->vocab->len; i++) {
+    printf ("%s\n", b->vocab->entries[i].word);
+    for (j = 0; j < n; j++)
+      printf ("%6.4f%s", b->model->embeddings[i * n + j], &"\0, "[j < (n - 1)]);
+    putchar ('\n');
+  }
 }
 
 int

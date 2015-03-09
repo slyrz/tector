@@ -24,6 +24,7 @@ int nn_load (struct model *, struct file *);
 int nn_save (struct model *, struct file *);
 int nn_alloc (struct model *);
 int nn_train (struct model *, struct corpus *);
+int nn_generate (struct model *);
 
 const struct model_interface interface_nn = {
   .size = sizeof (struct nn),
@@ -33,6 +34,7 @@ const struct model_interface interface_nn = {
   .save = nn_save,
   .alloc = nn_alloc,
   .train = nn_train,
+  .generate = nn_generate,
 };
 
 int
@@ -251,5 +253,14 @@ nn_train (struct model *base, struct corpus *c)
     train_bag_of_words (m, s);
   }
   mem_free (s);
+  return 0;
+}
+
+int
+nn_generate (struct model *base)
+{
+  struct nn *m = (struct nn *) base;
+
+  base->embeddings = m->syn0;
   return 0;
 }

@@ -132,3 +132,11 @@ model_train (struct model *m, struct corpus *c)
   m->state.changed = 1;
   return m->i->train (m, c);
 }
+
+int
+model_generate (struct model *m)
+{
+  if (!m->state.allocated)
+    return -1;
+  return m->i->generate (m);
+}
