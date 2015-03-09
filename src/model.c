@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "core/program.h"
 #include "core/bundle.h"
@@ -14,7 +15,7 @@ struct program program = {
   .name = "model",
   .info = "manage language models",
   .commands = {
-    { .name = "create", .args = "DIR", .opts = "ilw", .main = create },
+    { .name = "create", .args = "DIR", .opts = "iltvw", .main = create },
     { .name = "train", .args = "DIR TEXTFILE...", .main = train },
     { .name = "generate", .args = "DIR", .main = generate },
     { NULL },
@@ -26,13 +27,14 @@ static int iterations = 10;
 static int layer = 50;
 static int vector = 50;
 static int window = 5;
+static int type = MODEL_NN;
 
 static void
 create (int argc, char **argv)
 {
   if (b->model)
     fatal ("model exists");
-  b->model = model_new (b->vocab, MODEL_NN);
+  b->model = model_new (b->vocab, type);
   if (b->model == NULL)
     fatal ("model_new");
   b->model->size.layer = layer;
@@ -86,10 +88,19 @@ generate (int argc, char **argv)
 int
 main (int argc, char **argv)
 {
+  const char *typestr = NULL;
+
   program_init (argc, argv);
   program_getoptint ('i', &iterations);
   program_getoptint ('l', &layer);
+  program_getoptint ('v', &vector);
   program_getoptint ('w', &window);
+  program_getoptstr ('t', &typestr);
+
+  if (typestr) {
+    if (strcmp (typestr, "nn") == 0)
+      type = MODEL_NN;
+  }
 
   b = bundle_open (argv[0]);
   if (b == NULL)

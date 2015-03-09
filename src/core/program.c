@@ -19,6 +19,8 @@ static struct option options[32] = {
   makeoption ('i', "iterations", required_argument),
   makeoption ('l', "layers", required_argument),
   makeoption ('m', "mincount", required_argument),
+  makeoption ('t', "type", required_argument),
+  makeoption ('v', "vector", required_argument),
   makeoption ('w', "window", required_argument),
 };
 
