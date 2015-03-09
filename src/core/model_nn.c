@@ -38,6 +38,9 @@ const struct model_interface interface_nn = {
 int
 nn_init (struct model *base)
 {
+  struct nn *m = (struct nn *) base;
+
+  m->alpha = 0.05;
   return 0;
 }
 
