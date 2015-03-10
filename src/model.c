@@ -78,10 +78,9 @@ generate (int argc, char **argv)
 
   n = b->model->size.vector;
   for (i = 0; i < b->vocab->len; i++) {
-    printf ("%s\n", b->vocab->entries[i].word);
+    printf ("%s ", b->vocab->entries[i].word);
     for (j = 0; j < n; j++)
-      printf ("%6.4f%s", b->model->embeddings[i * n + j], &"\0, "[j < (n - 1)]);
-    putchar ('\n');
+      printf ("%6.4f%c", b->model->embeddings[i * n + j], "\n "[j < (n - 1)]);
   }
 }
 
