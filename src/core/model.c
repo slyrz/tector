@@ -9,6 +9,7 @@
 #include "model.h"
 
 extern struct model_interface interface_nn;
+extern struct model_interface interface_svd;
 
 static int
 model_alloc (struct model *m)
@@ -30,6 +31,9 @@ model_new (struct vocab *v, int type)
   switch (type) {
     case MODEL_NN:
       i = &interface_nn;
+      break;
+    case MODEL_SVD:
+      i = &interface_svd;
       break;
     default:
       return NULL;

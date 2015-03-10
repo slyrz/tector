@@ -99,6 +99,8 @@ main (int argc, char **argv)
   if (typestr) {
     if (strcmp (typestr, "nn") == 0)
       type = MODEL_NN;
+    if (strcmp (typestr, "svd") == 0)
+      type = MODEL_SVD;
   }
 
   b = bundle_open (argv[0]);

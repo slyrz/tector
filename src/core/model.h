@@ -9,6 +9,7 @@
 
 enum {
   MODEL_NN,
+  MODEL_SVD,
 };
 
 struct model {

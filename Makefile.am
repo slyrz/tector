@@ -18,9 +18,11 @@ libcore_a_SOURCES = \
   src/core/file.c \
   src/core/filter.c \
   src/core/hash.c \
+  src/core/linalg.c \
   src/core/mem.c \
   src/core/model.c \
   src/core/model_nn.c \
+  src/core/model_svd.c \
   src/core/ngram.c \
   src/core/program.c \
   src/core/scanner.c \
