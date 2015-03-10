@@ -6,6 +6,7 @@
 #include "exp.h"
 #include "file.h"
 #include "log.h"
+#include "macros.h"
 #include "mem.h"
 #include "model.h"
 
@@ -188,9 +189,6 @@ hierarchical_softmax (struct nn *restrict m, struct vocab_entry *restrict e)
     point++;
   }
 }
-
-#define inrange(v,i,j) \
-  (((v) >= (i)) && ((v) < (j)))
 
 static inline void
 train_bag_of_words (struct nn *restrict m, struct sentence *restrict s)
