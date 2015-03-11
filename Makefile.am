@@ -40,9 +40,6 @@ vocab_SOURCES = src/vocab.c
 check_PROGRAMS = \
   tests/corpus \
   tests/filter \
-  tests/load \
-  tests/neural_network \
-  tests/options \
   tests/scanner \
   tests/vocab
 

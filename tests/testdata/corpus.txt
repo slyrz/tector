@@ -1,28 +1,28 @@
-cat.
-mouse.
-frog.
-dog.
-frog rabbit donkey frog elephant cat baboon duck giraffe giraffe dog bear.
-cat turtle octopus baboon cat donkey duck.
-octopus mouse turtle rabbit bear duck.
-giraffe octopus duck.
-frog mole cat.
-elephant baboon mole donkey bear mole rabbit turtle.
-elephant mouse elephant baboon donkey turtle dog mouse frog mouse mole.
-rabbit bear elephant frog.
-mouse giraffe cat donkey rabbit octopus baboon bear dog.
-turtle mole giraffe giraffe giraffe mouse mouse elephant turtle rabbit baboon rabbit frog duck turtle.
+cat
+mouse
+frog
+dog
+frog rabbit donkey frog elephant cat baboon duck giraffe giraffe dog bear
+cat turtle octopus baboon cat donkey duck
+octopus mouse turtle rabbit bear duck
+giraffe octopus duck
+frog mole cat
+elephant baboon mole donkey bear mole rabbit turtle
+elephant mouse elephant baboon donkey turtle dog mouse frog mouse mole
+rabbit bear elephant frog
+mouse giraffe cat donkey rabbit octopus baboon bear dog
+turtle mole giraffe giraffe giraffe mouse mouse elephant turtle rabbit baboon rabbit frog duck turtle
 
 Some intentional blank lines:
 
 
-frogative bearative rabbitative dogful bearness moles octopuss giraffe duck.
-bears mouses donkeys catative donkeyness bearness moleness turtle baboonative duckness.
-bearative moleative duckness frogness dogness.
-catative moleful bearness.
-bearness giraffeative elephants rabbits.
-dogness moleative octopusness giraffeful duckful donkey bears turtleness elephantness giraffes.
-dogness moleative catative frogs giraffe frogative giraffe turtleness donkeys.
-elephantful donkey baboonful moleful.
-dogs.
-donkeyness octopuss bearative frog turtleative turtle elephants.
+frogative bearative rabbitative dogful bearness moles octopuss giraffe duck
+bears mouses donkeys catative donkeyness bearness moleness turtle baboonative duckness
+bearative moleative duckness frogness dogness
+catative moleful bearness
+bearness giraffeative elephants rabbits
+dogness moleative octopusness giraffeful duckful donkey bears turtleness elephantness giraffes
+dogness moleative catative frogs giraffe frogative giraffe turtleness donkeys
+elephantful donkey baboonful moleful
+dogs
+donkeyness octopuss bearative frog turtleative turtle elephants
