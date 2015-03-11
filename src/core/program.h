@@ -31,5 +31,6 @@ void program_run (void);
 void program_getoptstr (char c, const char **r);
 void program_getoptbool (char c, int *r);
 void program_getoptint (char c, int *r);
+void program_getoptuint (char c, unsigned int *r);
 
 #endif

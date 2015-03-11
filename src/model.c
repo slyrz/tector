@@ -23,11 +23,11 @@ struct program program = {
 };
 
 static struct bundle *b;
-static int iterations = 10;
-static int layer = 50;
-static int vector = 50;
-static int window = 5;
-static int type = MODEL_NN;
+static unsigned int iterations = 10;
+static unsigned int layer = 50;
+static unsigned int vector = 50;
+static unsigned int window = 5;
+static unsigned int type = MODEL_NN;
 
 static void
 create (int argc, char **argv)
@@ -90,10 +90,10 @@ main (int argc, char **argv)
   const char *typestr = NULL;
 
   program_init (argc, argv);
-  program_getoptint ('i', &iterations);
-  program_getoptint ('l', &layer);
-  program_getoptint ('v', &vector);
-  program_getoptint ('w', &window);
+  program_getoptuint ('i', &iterations);
+  program_getoptuint ('l', &layer);
+  program_getoptuint ('v', &vector);
+  program_getoptuint ('w', &window);
   program_getoptstr ('t', &typestr);
 
   if (typestr) {

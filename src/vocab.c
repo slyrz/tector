@@ -21,7 +21,7 @@ struct program program = {
 };
 
 static struct bundle *b;
-static int min = 10;
+static unsigned int min = 10;
 
 static void
 create (int argc, char **argv)
@@ -50,7 +50,7 @@ train (int argc, char **argv)
 static void
 print (int argc, char **argv)
 {
-  int i;
+  size_t i;
 
   if (b->vocab == NULL)
     fatal ("vocab missing");
@@ -62,7 +62,7 @@ int
 main (int argc, char **argv)
 {
   program_init (argc, argv);
-  program_getoptint ('m', &min);
+  program_getoptuint ('m', &min);
 
   b = bundle_open (argv[0]);
   if (b == NULL)

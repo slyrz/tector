@@ -71,7 +71,7 @@ static int
 uninitialized (const struct command *c)
 {
   char *p = (char *) c;
-  int i;
+  size_t i;
 
   for (i = 0; i < sizeof (struct command); i++)
     if (p[i] != 0)
@@ -105,7 +105,7 @@ print_command (FILE * stream, const struct command *c)
 }
 
 static void
-print_usage_and_exit (FILE * stream, const struct command *c, struct option *o)
+print_usage (FILE * stream, const struct command *c, struct option *o)
 {
   int i;
 
@@ -133,7 +133,6 @@ print_usage_and_exit (FILE * stream, const struct command *c, struct option *o)
     while (o->name)
       print_option (stream, o++);
   }
-  exit (0);
 }
 
 static void
@@ -218,8 +217,10 @@ parse (const struct command *c, int argc, char **argv)
     state.values[idx (v)] = optarg ? optarg : "";
   }
   state.values[31] = NULL;
-  if (v > 0)
-    print_usage_and_exit (stdout, c, longopts);
+  if (v > 0) {
+    print_usage (stdout, c, longopts);
+    exit (0);
+  }
   return optind;
 }
 
@@ -250,8 +251,8 @@ program_parseargs (int argc, char **argv)
   }
   return n;
 error:
-  print_usage_and_exit (stderr, NULL, NULL);
-  return 0;
+  print_usage (stderr, NULL, NULL);
+  exit (-1);
 }
 
 void
@@ -279,4 +280,14 @@ program_getoptint (char c, int *r)
 {
   if (val (c))
     *r = atoi (val (c));
+}
+
+void
+program_getoptuint (char c, unsigned int *r)
+{
+  int v = 0;
+
+  program_getoptint (c, &v);
+  if (v > 0)
+    *r = (unsigned int) v;
 }
