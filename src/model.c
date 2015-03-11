@@ -97,6 +97,8 @@ main (int argc, char **argv)
   program_getoptstr ('t', &typestr);
 
   if (typestr) {
+    if (strcmp (typestr, "glove") == 0)
+      type = MODEL_GLOVE;
     if (strcmp (typestr, "nn") == 0)
       type = MODEL_NN;
     if (strcmp (typestr, "svd") == 0)

@@ -8,6 +8,7 @@
 #include "file.h"
 
 enum {
+  MODEL_GLOVE,
   MODEL_NN,
   MODEL_SVD,
 };

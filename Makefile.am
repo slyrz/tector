@@ -23,6 +23,7 @@ libcore_a_SOURCES = \
   src/core/model.c \
   src/core/model_nn.c \
   src/core/model_svd.c \
+  src/core/model_glove.c \
   src/core/ngram.c \
   src/core/program.c \
   src/core/scanner.c \

@@ -10,6 +10,7 @@
 
 extern struct model_interface interface_nn;
 extern struct model_interface interface_svd;
+extern struct model_interface interface_glove;
 
 static int
 model_alloc (struct model *m)
@@ -34,6 +35,9 @@ model_new (struct vocab *v, unsigned int type)
       break;
     case MODEL_SVD:
       i = &interface_svd;
+      break;
+    case MODEL_GLOVE:
+      i = &interface_glove;
       break;
     default:
       return NULL;
