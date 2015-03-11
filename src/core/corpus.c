@@ -110,7 +110,7 @@ add_sentence (struct corpus *c, char *s)
    * a dangling pointer if words get resized.
    */
   append (c, words, 0);
-  append (c, sentences, (struct sentence *) c->words.ptr + c->words.len - 1);
+  append (c, sentences, (struct sentence *) (c->words.ptr + c->words.len - 1));
 
   while (w = strtok_r (s, " ", &s), w) {
     if (vocab_find (c->vocab, w, &x) != 0)

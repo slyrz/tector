@@ -400,6 +400,9 @@ trim (const float *a, const float *w, size_t m, size_t n, size_t k, float *d)
   size_t i;
   size_t j;
 
+  if (k > n)
+    return;
+
   for (i = 0; i < n; i++)
     p[i] = w + i;
   qsort (p, n, sizeof (float *), cmp);
