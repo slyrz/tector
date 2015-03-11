@@ -22,7 +22,7 @@ struct program {
     if (argidx > 0) { \
       argv += argidx; \
       argc -= argidx; \
-	} \
+    } \
   } while (0)
 
 int program_parseargs (int argc, char **argv);
