@@ -23,7 +23,7 @@ model_alloc (struct model *m)
 }
 
 struct model *
-model_new (struct vocab *v, int type)
+model_new (struct vocab *v, unsigned int type)
 {
   const struct model_interface *i;
   struct model *m;

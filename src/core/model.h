@@ -15,7 +15,7 @@ enum {
 struct model {
   const struct model_interface *i;
   struct vocab *v;
-  int type;
+  unsigned int type;
   struct {
     size_t iter;
     size_t layer;
@@ -41,7 +41,7 @@ struct model_interface {
   int (*generate) (struct model *);
 };
 
-struct model *model_new (struct vocab *, int);
+struct model *model_new (struct vocab *, unsigned int);
 struct model *model_open (struct vocab *, const char *);
 void model_free (struct model *);
 
