@@ -12,7 +12,7 @@
 
 struct svd {
   struct model base;
-  uint64_t *cnt;
+  float *cnt;
 };
 
 int svd_init (struct model *);
@@ -54,7 +54,7 @@ svd_load (struct model *base, struct file *f)
 {
   struct svd *m = (struct svd *) base;
 
-  return file_read (f, m->cnt, base->size.vocab * base->size.layer * sizeof (uint64_t));
+  return file_read (f, m->cnt, base->size.vocab * base->size.layer * sizeof (float));
 }
 
 int
@@ -62,7 +62,7 @@ svd_save (struct model *base, struct file *f)
 {
   struct svd *m = (struct svd *) base;
 
-  return file_write (f, m->cnt, base->size.vocab * base->size.layer * sizeof (uint64_t));
+  return file_write (f, m->cnt, base->size.vocab * base->size.layer * sizeof (float));
 }
 
 int
@@ -70,10 +70,10 @@ svd_alloc (struct model *base)
 {
   struct svd *m = (struct svd *) base;
 
-  m->cnt = mem_realloc (m->cnt, base->size.layer * base->size.vocab, sizeof (uint64_t));
+  m->cnt = mem_realloc (m->cnt, base->size.layer * base->size.vocab, sizeof (float));
   if (m->cnt == NULL)
     goto error;
-  mem_clear (m->cnt, base->size.layer * base->size.vocab, sizeof (uint64_t));
+  mem_clear (m->cnt, base->size.layer * base->size.vocab, sizeof (float));
   return 0;
 error:
   mem_free (m->cnt);
@@ -92,13 +92,13 @@ train (struct svd *restrict m, struct sentence *restrict s)
   long long x;
 
   for (i = 0; i < (long long) s->len; i++) {
-    x = s->words[i] * sl;
+    x = (long long) s->words[i] * sl;
     for (j = 0; j < (long long) sw * 2 + 1; j++) {
       if (j == sw)
         continue;
       k = i + j - sw;
       if (inrange (k, 0, (long long) s->len))
-        m->cnt[x + (m->base.v->entries[s->words[k]].hash % sl)]++;
+        m->cnt[x + (m->base.v->entries[s->words[k]].hash % sl)] += 1.0 / fabs ((float) (k - i));
     }
   }
 }
@@ -134,7 +134,7 @@ svd_generate (struct model *base)
   if (p == NULL)
     goto error;
   for (i = 0; i < sv * sl; i++)
-    p[i] = (float) sqrt ((double) m->cnt[i]);
+    p[i] = sqrtf (m->cnt[i]);
   svd_topk (p, sv, sl, se, &q);
   if (q == NULL)
     goto error;
