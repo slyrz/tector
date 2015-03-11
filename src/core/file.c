@@ -14,7 +14,7 @@ const int mode_write = O_WRONLY | O_CREAT | O_TRUNC;
 static uint32_t
 header_checksum (struct file *f)
 {
-  return hashptr ((void *) &f->header + sizeof (f->header.checksum), sizeof (f->header) - sizeof (f->header.checksum));
+  return hashptr ((void *) ((char *) &f->header + sizeof (f->header.checksum)), sizeof (f->header) - sizeof (f->header.checksum));
 }
 
 static int
@@ -31,7 +31,7 @@ header_write (struct file *f)
   return file_write (f, &f->header, sizeof (f->header));
 }
 
-struct file *
+static struct file *
 file_new (const char *path, int mode)
 {
   struct file *f;
