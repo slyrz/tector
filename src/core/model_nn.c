@@ -105,10 +105,10 @@ nn_alloc (struct model *base)
   struct nn *m = (struct nn *) base;
   size_t i;
 
-  mem_free (m->syn0);
-  mem_free (m->syn1);
-  mem_free (m->neu1);
-  mem_free (m->neu2);
+  mem_freenull (m->syn0);
+  mem_freenull (m->syn1);
+  mem_freenull (m->neu1);
+  mem_freenull (m->neu2);
 
   m->syn0 = mem_alloc (base->size.layer * base->size.vocab, sizeof (float));
   m->syn1 = mem_alloc (base->size.layer * base->size.vocab, sizeof (float));
