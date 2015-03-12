@@ -1,6 +1,7 @@
 #ifndef CORE_FILE_H
 #define CORE_FILE_H
 
+#include <stdint.h>
 #include <unistd.h>
 
 struct file {
