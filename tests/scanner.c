@@ -19,15 +19,17 @@ test (const char *path)
   char b[1024];
   int i;
 
-  s = scanner_new (path);
+  s = scanner_open (path);
   assert (s != NULL);
   i = 0;
   while (scanner_readline (s, b, sizeof (b)) == 0)
     assert ((i < 5) && (strcmp (lines[i++], b) == 0));
+  assert (i == 5);
   scanner_rewind (s);
   i = 0;
   while (scanner_readline (s, b, sizeof (b)) == 0)
     assert ((i < 5) && (strcmp (lines[i++], b) == 0));
+  assert (i == 5);
   scanner_free (s);
 }
 
