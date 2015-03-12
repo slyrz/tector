@@ -59,6 +59,8 @@ scanner_new (int fd)
 {
   struct scanner *s;
 
+  if (fcntl (fd, F_GETFD) != 0)
+    return NULL;
   s = mem_alloc (sizeof (struct scanner), 1);
   if (s == NULL)
     return NULL;
