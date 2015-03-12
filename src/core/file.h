@@ -10,7 +10,7 @@ struct file {
   struct {
     uint32_t checksum;
     uint32_t type;
-    uint64_t data[7];
+    uint64_t data[31];
   } header;
 };
 
