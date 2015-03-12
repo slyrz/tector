@@ -41,6 +41,7 @@ check_PROGRAMS = \
   tests/corpus \
   tests/file \
   tests/filter \
+  tests/linalg \
   tests/scanner \
   tests/vocab
 
