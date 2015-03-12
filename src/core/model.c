@@ -75,10 +75,11 @@ model_open (struct vocab *v, const char *path)
   m = model_new (v, f->header.type);
   if (m == NULL)
     goto error;
-  m->size.layer = f->header.data[0];
-  m->size.vector = f->header.data[1];
-  m->size.vocab = f->header.data[2];
-  m->size.window = f->header.data[3];
+  m->size.iter = f->header.data[0];
+  m->size.layer = f->header.data[1];
+  m->size.vector = f->header.data[2];
+  m->size.vocab = f->header.data[3];
+  m->size.window = f->header.data[4];
   if (m->size.vocab != v->len)
     goto error;
   if (model_alloc (m) != 0)
@@ -109,10 +110,11 @@ model_save (struct model *m, const char *path)
   if (f == NULL)
     goto error;
   f->header.type = m->type;
-  f->header.data[0] = m->size.layer;
-  f->header.data[1] = m->size.vector;
-  f->header.data[2] = m->size.vocab;
-  f->header.data[3] = m->size.window;
+  f->header.data[0] = m->size.iter;
+  f->header.data[1] = m->size.layer;
+  f->header.data[2] = m->size.vector;
+  f->header.data[3] = m->size.vocab;
+  f->header.data[4] = m->size.window;
   if (m->i->save (m, f) != 0)
     goto error;
   file_close (f);
