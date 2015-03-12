@@ -39,6 +39,7 @@ vocab_SOURCES = src/vocab.c
 
 check_PROGRAMS = \
   tests/corpus \
+  tests/file \
   tests/filter \
   tests/scanner \
   tests/vocab
