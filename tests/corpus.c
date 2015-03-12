@@ -38,8 +38,12 @@ main (void)
   c = corpus_new (v);
   assert (c != NULL);
   assert (corpus_parse (c, "tests/testdata/corpus.txt") == 0);
-
   assert (memcmp (c->words.ptr, words, c->words.len * sizeof (size_t)) == 0);
+  corpus_clear (c);
+  // Stress test to trigger a memory rebuild.
+  for (i = 0; i < 2000; i++)
+    assert (corpus_parse (c, "tests/testdata/corpus.txt") == 0);
+  // Make sure everything is linked correctly.
   for (i = j = 0; i < c->sentences.len; i++) {
     assert (c->sentences.ptr[i]->len == c->words.ptr[j++]);
     for (k = 0; k < c->sentences.ptr[i]->len; k++)
