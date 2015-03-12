@@ -1,3 +1,9 @@
+/**
+ * This file incorporates derivative work covered by the
+ * following copyright and permission notice:
+ *
+ * Copyright 2013 Google Inc. All Rights Reserved.
+ */
 #include <string.h>
 #include <stdint.h>
 #include <math.h>

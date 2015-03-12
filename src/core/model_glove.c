@@ -1,3 +1,10 @@
+/**
+ * This file incorporates derivative work covered by the
+ * following copyright and permission notice:
+ *
+ * Copyright 2014 The Board of Trustees of The Leland Stanford Junior
+ * University. All Rights Reserved.
+ */
 #include <string.h>
 #include <stdint.h>
 #include <math.h>
