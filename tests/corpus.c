@@ -46,5 +46,6 @@ main (void)
       assert (c->sentences.ptr[i]->words[k] == c->words.ptr[j++]);
   }
   corpus_free (c);
+  vocab_free (v);
   return EXIT_SUCCESS;
 }
