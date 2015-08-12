@@ -2,9 +2,10 @@
 #include "log.h"
 #include "string.h"
 
+#include <malloc.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
-#include <malloc.h>
 
 static size_t used = 0;
 static size_t objects = 0;
@@ -68,7 +69,7 @@ bookkeep (int mode, void *ptr)
   logusage ();
 }
 
-static inline int
+static inline bool
 valid (size_t n, size_t s)
 {
   const size_t t = 1ul << (sizeof (size_t) * 4);

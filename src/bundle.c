@@ -2,6 +2,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -9,7 +10,7 @@
 #include "log.h"
 #include "mem.h"
 
-static int
+static bool
 newer (const char *a, const char *b)
 {
   struct stat sa;
@@ -22,7 +23,7 @@ newer (const char *a, const char *b)
   return sa.st_mtime > sb.st_mtime;
 }
 
-static int
+static bool
 exists (const char *path)
 {
   struct stat s;

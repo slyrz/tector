@@ -3,11 +3,12 @@
 
 #include <errno.h>
 #include <getopt.h>
+#include <limits.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdint.h>
-#include <limits.h>
 
 extern struct program program;
 
@@ -67,7 +68,7 @@ val (int c)
  * A command is uninitialized if its memory is all zero. This has to apply for
  * the last element in the program.commands array.
  */
-static int
+static bool
 uninitialized (const struct command *c)
 {
   char *p = (char *) c;
@@ -75,8 +76,8 @@ uninitialized (const struct command *c)
 
   for (i = 0; i < sizeof (struct command); i++)
     if (p[i] != 0)
-      return 0;
-  return 1;
+      return false;
+  return true;
 }
 
 static void

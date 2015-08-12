@@ -3,8 +3,9 @@
 
 #include <assert.h>
 #include <math.h>
-#include <stdlib.h>
+#include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #define M 11
 #define N 5
@@ -49,13 +50,13 @@ const float V[N * N] = {
     0.11560f,  0.09436f, -0.16535f,  0.05364f,  0.97340f,
 };
 
-static int
+static bool
 almostequal (float a, float b)
 {
   return fabsf (a - b) < 0.001f;
 }
 
-static int
+static bool
 almostequalabs (float a, float b)
 {
   return almostequal (fabsf (a), fabsf (b));

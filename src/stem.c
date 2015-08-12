@@ -2,6 +2,7 @@
 #include "stem.h"
 #include "string.h"
 
+#include <stdbool.h>
 #include <string.h>
 
 struct stem {
@@ -10,7 +11,7 @@ struct stem {
   char *b;
 };
 
-static inline int
+static inline bool
 cons (struct stem *restrict s, size_t i)
 {
   switch (s->b[i]) {
@@ -19,11 +20,11 @@ cons (struct stem *restrict s, size_t i)
     case 'i':
     case 'o':
     case 'u':
-      return 0;
+      return false;
     case 'y':
       return (i == 0) || ((i > 0) && !cons (s, i - 1));
     default:
-      return 1;
+      return true;
   }
 }
 
@@ -61,23 +62,23 @@ m (struct stem *restrict s)
   }
 }
 
-static inline int
+static inline bool
 vowelinstem (struct stem *restrict s)
 {
   size_t i;
   for (i = 0; i <= s->j; i++)
     if (!cons (s, i))
-      return 1;
-  return 0;
+      return true;
+  return false;
 }
 
-static inline int
+static inline bool
 doublec (struct stem *restrict s, size_t j)
 {
   return (j > 0) && (cons (s, j)) && (s->b[j] == s->b[j - 1]);
 }
 
-static inline int
+static inline bool
 cvc (struct stem *restrict s, size_t i)
 {
   int ch;
@@ -85,22 +86,22 @@ cvc (struct stem *restrict s, size_t i)
     ch = s->b[i];
     return (ch != 'w') & (ch != 'x') & (s->b[i] != 'y');
   }
-  return 0;
+  return false;
 }
 
-static inline int
+static inline bool
 ends (struct stem *restrict s, const char *w)
 {
   size_t l = (size_t) w[0];
   if ((l > s->k + 1) || (w[l] != s->b[s->k]))
-    return 0;
+    return false;
   if (memcmp (s->b + s->k - l + 1, w + 1, l))
-    return 0;
+    return false;
   if (l < s->k)
     s->j = s->k - l;
   else
     s->j = 0;
-  return 1;
+  return true;
 }
 
 static inline void

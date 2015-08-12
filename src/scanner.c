@@ -3,6 +3,7 @@
 #include "string.h"
 #include "mem.h"
 
+#include <stdbool.h>
 #include <fcntl.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -26,13 +27,13 @@ fetch (struct scanner *s)
   return 0;
 }
 
-static inline int
+static inline bool
 endofbuffer (struct scanner *s)
 {
   return (s->pos >= s->len);
 }
 
-static inline int
+static inline bool
 endoffile (struct scanner *s)
 {
   return endofbuffer (s) && fetch (s);
