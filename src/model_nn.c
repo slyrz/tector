@@ -247,14 +247,20 @@ nn_train (struct model *base, struct corpus *c)
 
   struct sentence *s;
   size_t i;
+  size_t j;
 
   s = mem_alloc (512, sizeof (size_t));
-  for (i = 0; i < c->sentences.len; i++) {
-    if ((i & 0xfff) == 0)
-      progress (i, c->sentences.len, "training");
-    if (subsample (s, c->sentences.ptr[i], 511) == 0)
-      continue;
-    train_bag_of_words (m, s);
+  if (s == NULL)
+    return -1;
+
+  for (i = 0; i < base->size.iter; i++) {
+    for (j = 0; j < c->sentences.len; j++) {
+      if ((j & 0xfff) == 0)
+        progress (j, c->sentences.len, "training %d/%d", i + 1, base->size.iter);
+      if (subsample (s, c->sentences.ptr[j], 511) == 0)
+        continue;
+      train_bag_of_words (m, s);
+    }
   }
   mem_free (s);
   return 0;

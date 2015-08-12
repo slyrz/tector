@@ -23,7 +23,7 @@ struct program program = {
 };
 
 static struct bundle *b;
-static unsigned int iterations = 10;
+static unsigned int iterations = 5;
 static unsigned int layer = 50;
 static unsigned int vector = 50;
 static unsigned int window = 5;
@@ -40,6 +40,7 @@ create (int argc, char **argv)
   b->model->size.layer = layer;
   b->model->size.vector = vector;
   b->model->size.window = window;
+  b->model->size.iter = iterations;
 }
 
 static void
