@@ -1,5 +1,5 @@
-#ifndef CORE_LINALG_H
-#define CORE_LINALG_H
+#ifndef TECTOR_LINALG_H
+#define TECTOR_LINALG_H
 
 #include <stdlib.h>
 

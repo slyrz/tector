@@ -1,5 +1,5 @@
-#ifndef CORE_LOG_H
-#define CORE_LOG_H
+#ifndef TECTOR_LOG_H
+#define TECTOR_LOG_H
 
 #include <stdio.h>
 

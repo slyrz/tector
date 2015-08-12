@@ -1,5 +1,5 @@
-#ifndef CORE_VOCAB_H
-#define CORE_VOCAB_H
+#ifndef TECTOR_VOCAB_H
+#define TECTOR_VOCAB_H
 
 #include <stdlib.h>
 #include <stdint.h>

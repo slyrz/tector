@@ -1,5 +1,5 @@
-#include "../src/core/linalg.h"
-#include "../src/core/mem.h"
+#include "../src/linalg.h"
+#include "../src/mem.h"
 
 #include <assert.h>
 #include <math.h>

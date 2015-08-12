@@ -1,4 +1,4 @@
-#include "../src/core/filter.h"
+#include "../src/filter.h"
 
 #include <string.h>
 #include <stdlib.h>

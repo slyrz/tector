@@ -1,5 +1,5 @@
-#ifndef CORE_HASH_H
-#define CORE_HASH_H
+#ifndef TECTOR_HASH_H
+#define TECTOR_HASH_H
 
 #include "config.h"
 #include <stdlib.h>

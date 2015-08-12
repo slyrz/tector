@@ -1,5 +1,5 @@
-#ifndef CORE_MODEL_H
-#define CORE_MODEL_H
+#ifndef TECTOR_MODEL_H
+#define TECTOR_MODEL_H
 
 #include <stdlib.h>
 

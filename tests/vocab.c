@@ -1,4 +1,4 @@
-#include "../src/core/vocab.h"
+#include "../src/vocab.h"
 
 #include <string.h>
 #include <stdlib.h>

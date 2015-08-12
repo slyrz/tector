@@ -1,5 +1,5 @@
-#include "../src/core/vocab.h"
-#include "../src/core/corpus.h"
+#include "../src/vocab.h"
+#include "../src/corpus.h"
 
 #include <string.h>
 #include <stdlib.h>

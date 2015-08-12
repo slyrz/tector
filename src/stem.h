@@ -1,5 +1,5 @@
-#ifndef CORE_STEM_H
-#define CORE_STEM_H
+#ifndef TECTOR_STEM_H
+#define TECTOR_STEM_H
 
 #include <stdlib.h>
 

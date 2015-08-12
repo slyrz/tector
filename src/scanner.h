@@ -1,5 +1,5 @@
-#ifndef CORE_SCANNER_H
-#define CORE_SCANNER_H
+#ifndef TECTOR_SCANNER_H
+#define TECTOR_SCANNER_H
 
 #include <stdlib.h>
 

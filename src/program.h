@@ -1,5 +1,5 @@
-#ifndef CORE_PROGRAM_H
-#define CORE_PROGRAM_H
+#ifndef TECTOR_PROGRAM_H
+#define TECTOR_PROGRAM_H
 
 #include <stdlib.h>
 

@@ -5,7 +5,7 @@ AC_PREREQ(2.61)
 AC_INIT([tector],[0.1])
 AC_LANG([C])
 AC_CONFIG_SRCDIR([Makefile.am])
-AC_CONFIG_HEADERS([src/core/config.h])
+AC_CONFIG_HEADERS([src/config.h])
 
 AM_INIT_AUTOMAKE([foreign subdir-objects silent-rules])
 AM_MAINTAINER_MODE([enable])

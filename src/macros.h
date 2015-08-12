@@ -1,5 +1,5 @@
-#ifndef CORE_MACROS_H
-#define CORE_MACROS_H
+#ifndef TECTOR_MACROS_H
+#define TECTOR_MACROS_H
 
 #define swap(a,b) \
   do { \

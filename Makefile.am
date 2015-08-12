@@ -12,30 +12,30 @@ bin_PROGRAMS = \
   vocab
 
 libcore_a_SOURCES = \
-  src/core/bundle.c \
-  src/core/corpus.c \
-  src/core/exp.c \
-  src/core/file.c \
-  src/core/filter.c \
-  src/core/hash.c \
-  src/core/linalg.c \
-  src/core/mem.c \
-  src/core/model.c \
-  src/core/model_nn.c \
-  src/core/model_svd.c \
-  src/core/model_glove.c \
-  src/core/ngram.c \
-  src/core/program.c \
-  src/core/scanner.c \
-  src/core/stem.c \
-  src/core/stopwords.c \
-  src/core/string.c \
-  src/core/vocab.c
+  src/bundle.c \
+  src/corpus.c \
+  src/exp.c \
+  src/file.c \
+  src/filter.c \
+  src/hash.c \
+  src/linalg.c \
+  src/mem.c \
+  src/model.c \
+  src/model_nn.c \
+  src/model_svd.c \
+  src/model_glove.c \
+  src/ngram.c \
+  src/program.c \
+  src/scanner.c \
+  src/stem.c \
+  src/stopwords.c \
+  src/string.c \
+  src/vocab.c
 
 LDADD = libcore.a
-filter_SOURCES = src/filter.c
-model_SOURCES = src/model.c
-vocab_SOURCES = src/vocab.c
+filter_SOURCES = src/main_filter.c
+model_SOURCES = src/main_model.c
+vocab_SOURCES = src/main_vocab.c
 
 check_PROGRAMS = \
   tests/corpus \

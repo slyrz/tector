@@ -1,5 +1,5 @@
-#ifndef CORE_MEM_H
-#define CORE_MEM_H
+#ifndef TECTOR_MEM_H
+#define TECTOR_MEM_H
 
 #include <stdlib.h>
 #include <stdint.h>

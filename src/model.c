@@ -1,115 +1,152 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/types.h>
 
-#include "core/program.h"
-#include "core/bundle.h"
-#include "core/log.h"
-#include "core/model.h"
+#include "mem.h"
+#include "model.h"
 
-static void create (int argc, char **argv);
-static void train (int argc, char **argv);
-static void generate (int argc, char **argv);
+extern struct model_interface interface_nn;
+extern struct model_interface interface_svd;
+extern struct model_interface interface_glove;
 
-struct program program = {
-  .name = "model",
-  .info = "manage language models",
-  .commands = {
-    { .name = "create", .args = "DIR", .opts = "iltvw", .main = create },
-    { .name = "train", .args = "DIR TEXTFILE...", .main = train },
-    { .name = "generate", .args = "DIR", .main = generate },
-    { NULL },
-  },
-};
-
-static struct bundle *b;
-static unsigned int iterations = 10;
-static unsigned int layer = 50;
-static unsigned int vector = 50;
-static unsigned int window = 5;
-static unsigned int type = MODEL_NN;
-
-static void
-create (int argc, char **argv)
+static int
+model_alloc (struct model *m)
 {
-  if (b->model)
-    fatal ("model exists");
-  b->model = model_new (b->vocab, type);
-  if (b->model == NULL)
-    fatal ("model_new");
-  b->model->size.layer = layer;
-  b->model->size.vector = vector;
-  b->model->size.window = window;
+  if (!m->state.allocated) {
+    if (m->i->alloc (m) != 0)
+      return -1;
+    m->state.allocated = 1;
+  }
+  return 0;
 }
 
-static void
-train (int argc, char **argv)
+struct model *
+model_new (struct vocab *v, unsigned int type)
 {
-  struct corpus *c;
-  int i;
+  const struct model_interface *i;
+  struct model *m;
 
-  if (b->model == NULL)
-    fatal ("model missing");
-  c = corpus_new (b->vocab);
-  if (c == NULL)
-    fatal ("corpus_new");
-  for (i = 0; i < argc; i++) {
-    if (corpus_parse (c, argv[i]) != 0)
-      fatal ("corpus_parse");
-    if (model_train (b->model, c) != 0)
-      fatal ("model_train");
-    corpus_clear (c);
+  switch (type) {
+    case MODEL_NN:
+      i = &interface_nn;
+      break;
+    case MODEL_SVD:
+      i = &interface_svd;
+      break;
+    case MODEL_GLOVE:
+      i = &interface_glove;
+      break;
+    default:
+      return NULL;
   }
-  corpus_free (c);
+
+  m = mem_alloc (1, i->size);
+  if (m == NULL)
+    return NULL;
+  m->i = i;
+  m->v = v;
+  m->type = type;
+  m->size.vocab = v->len;
+  m->size.layer = 64;
+  m->size.vector = 64;
+  m->size.window = 5;
+  if (m->i->init (m) != 0)
+    goto error;
+  m->state.changed = 1;
+  return m;
+error:
+  if (m)
+    model_free (m);
+  return NULL;
 }
 
-static void
-generate (int argc, char **argv)
+struct model *
+model_open (struct vocab *v, const char *path)
 {
-  size_t n;
-  size_t i;
-  size_t j;
+  struct file *f = NULL;
+  struct model *m = NULL;
 
-  if (b->model == NULL)
-    fatal ("model missing");
-
-  if (model_generate (b->model) != 0)
-    fatal ("model_generate");
-
-  n = b->model->size.vector;
-  for (i = 0; i < b->vocab->len; i++) {
-    printf ("%s ", b->vocab->entries[i].word);
-    for (j = 0; j < n; j++)
-      printf ("%6.4f%c", b->model->embeddings[i * n + j], "\n "[j < (n - 1)]);
-  }
+  f = file_open (path);
+  if (f == NULL)
+    goto error;
+  m = model_new (v, f->header.type);
+  if (m == NULL)
+    goto error;
+  m->size.iter = f->header.data[0];
+  m->size.layer = f->header.data[1];
+  m->size.vector = f->header.data[2];
+  m->size.vocab = f->header.data[3];
+  m->size.window = f->header.data[4];
+  if (m->size.vocab != v->len)
+    goto error;
+  if (model_alloc (m) != 0)
+    goto error;
+  if (m->i->load (m, f) != 0)
+    goto error;
+  file_close (f);
+  m->state.changed = 0;
+  return m;
+error:
+  if (m)
+    model_free (m);
+  if (f)
+    file_close (f);
+  return NULL;
 }
 
 int
-main (int argc, char **argv)
+model_save (struct model *m, const char *path)
 {
-  const char *typestr = NULL;
+  struct file *f = NULL;
 
-  program_init (argc, argv);
-  program_getoptuint ('i', &iterations);
-  program_getoptuint ('l', &layer);
-  program_getoptuint ('v', &vector);
-  program_getoptuint ('w', &window);
-  program_getoptstr ('t', &typestr);
-
-  if (typestr) {
-    if (strcmp (typestr, "glove") == 0)
-      type = MODEL_GLOVE;
-    if (strcmp (typestr, "nn") == 0)
-      type = MODEL_NN;
-    if (strcmp (typestr, "svd") == 0)
-      type = MODEL_SVD;
-  }
-
-  b = bundle_open (argv[0]);
-  if (b == NULL)
-    fatal ("bundle_open");
-  program_run ();
-  bundle_save (b);
-  bundle_free (b);
+  if (!m->state.changed)
+    return 0;
+  if (model_alloc (m) != 0)
+    return -1;
+  f = file_create (path);
+  if (f == NULL)
+    goto error;
+  f->header.type = m->type;
+  f->header.data[0] = m->size.iter;
+  f->header.data[1] = m->size.layer;
+  f->header.data[2] = m->size.vector;
+  f->header.data[3] = m->size.vocab;
+  f->header.data[4] = m->size.window;
+  if (m->i->save (m, f) != 0)
+    goto error;
+  file_close (f);
+  m->state.changed = 0;
   return 0;
+error:
+  if (f)
+    file_close (f);
+  return -1;
+}
+
+void
+model_free (struct model *m)
+{
+  if (m->state.allocated)
+    m->i->free (m);
+  mem_free (m);
+}
+
+int
+model_train (struct model *m, struct corpus *c)
+{
+  if (model_alloc (m) != 0)
+    return -1;
+  m->state.changed = 1;
+  return m->i->train (m, c);
+}
+
+int
+model_generate (struct model *m)
+{
+  if (!m->state.allocated)
+    return -1;
+  return m->i->generate (m);
 }

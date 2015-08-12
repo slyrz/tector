@@ -1,4 +1,4 @@
-#include "../src/core/scanner.h"
+#include "../src/scanner.h"
 
 #include <string.h>
 #include <stdlib.h>
