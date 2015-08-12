@@ -13,7 +13,7 @@
  * buffer overflows.
  */
 static size_t
-filterword (char *dst, char *restrict src)
+filterword (char *dst, const char *restrict src)
 {
   bool split = false;
   int i = 0;
