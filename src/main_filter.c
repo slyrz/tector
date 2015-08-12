@@ -11,7 +11,7 @@ struct program program = {
   .info = "cleans text, peforms stemming and stopword removal",
   .commands = {
     { .args = "TEXTFILE..." },
-    { NULL },
+    {},
   },
 };
 

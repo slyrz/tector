@@ -16,7 +16,7 @@ struct program program = {
     { .name = "create", .args = "DIR", .opts = "m", .main = create },
     { .name = "train", .args = "DIR TEXTFILE...", .main = train },
     { .name = "print", .args = "DIR", .main = print },
-    { NULL },
+    {},
   },
 };
 
