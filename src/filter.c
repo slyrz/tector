@@ -4,118 +4,102 @@
 #include "stem.h"
 #include "string.h"
 
+#include <stdbool.h>
 #include <string.h>
 
 /**
- * Filter 1:
- *  - convert upper- to lowercase
- *  - remove all non-alphabetic characters
- *  - split hyphenated words
- *  - discard the filtered word if it doesn't contain at least two characters,
- *    or if more than two characters were filtered or if it consists of
- *    a single character only (e.g. "aaaaa").
- */
-static inline int
-filter01 (char *restrict w, char **n)
-{
-  char *d = w;
-  int c = 0;
-  int v = 0;
-
-  while (*w) {
-    *d = lowercase (*w);
-    if (isalpha (*d)) {
-      v |= 1 << ordalpha (*d);
-      d++;
-      c++;
-    }
-    if (*w == '-')
-      break;
-    w++;
-  }
-  if (*w)
-    *n = w + 1;
-  *d = '\0';
-
-  /**
-   * Discard if the remaining word has a length <= 1 or
-   * more then 2 chars were filtered.
-   */
-  return (c <= 1) || ((w - d) > 2) || ((v & (v - 1)) == 0);
-}
-
-/**
- * Filter 2:
- *  - remove stopwords.
- */
-static inline int
-filter02 (char *restrict w, char **n)
-{
-  return isstopword (w);
-}
-
-/**
- * Filter 3:
- *  - stem words.
- */
-static inline int
-filter03 (char *restrict w, char **n)
-{
-  return (stem (w) <= 1);
-}
-
-#define perform(f,d,b) \
-  do { \
-    if (f (d,b) != 0) { \
-      *d = '\0'; \
-      goto abort; \
-    } \
-  } while (0)
-
-/**
- * Performs various filters on a word. This uses memmove and
- * thus can work in-place. The filtered word will never exceed the unfiltered
- * word, so no buffer overflows.
+ * Cleans and filters a word. This function can work in-place.
+ * The filtered word will never exceed the unfiltered word, so no
+ * buffer overflows.
  */
 static size_t
-filterword (char *dst, char *src, size_t l)
+filterword (char *dst, char *restrict src)
 {
-  char *br = NULL;
-  size_t k;
+  bool split = false;
+  int i = 0;
+  int j = 0;
+  int mask = 0;
 
-  if (*src == '\0')
-    return 0;
-
-  if (dst != src)
-    memmove (dst, src, l);
-  dst[l] = '\0';
-
-  k = 0;
-  perform (filter01, dst, &br);
-  perform (filter02, dst, &br);
-  perform (filter03, dst, &br);
-  k = strlen (dst);
-abort:
-  if (br) {
-    if (k)
-      dst[k++] = ' ';
-    k += filterword (dst + k, br, l - (size_t) (br - dst));
+  /**
+   * First write the characters from src to dst. Filter everything that isn't
+   * part of the Latin alphabet [a-z]. Also keep track of what letters were read
+   * in the bitmask mask.
+   */
+  while (src[i] != '\0') {
+    /* Split words at dashes. */
+    if (src[i] == '-') {
+      split = true;
+      break;
+    }
+    if (isalpha (src[i])) {
+      dst[j] = lowercase (src[i]);
+      mask |= 1 << ordalpha (dst[j]);
+      j++;
+    }
+    i++;
   }
-  return k;
+  dst[j] = '\0';
+
+  /**
+   * Ignore the word if it has less than 2 characters.
+   */
+  if (j < 2)
+    j = 0;
+
+  /**
+   * Ignore the word if it contained more than 2 non-alphabetic
+   * characters.
+   */
+  if ((i - j) > 2)
+    j = 0;
+
+  /**
+   * Ignore the word if it consists of a single letter only (e.g. "aaaaa"),
+   * this means only 1 bit in mask is set.
+   */
+  if ((mask & (mask - 1)) == 0)
+    j = 0;
+
+  /**
+   * Ignore the word if it is a stopword.
+   */
+  if (j > 0) {
+    if (isstopword (dst))
+      j = 0;
+  }
+
+  /**
+   * Stem the word. Ignore it if the stemmed word has less than 2 chars.
+   */
+  if (j > 0) {
+    if (j = stem (dst), j < 2)
+      j = 0;
+  }
+
+  /**
+   * If processing stopped at a dash, split the word and call this function
+   * on the remaining text.
+   */
+  if (split) {
+    if (j > 0)
+      dst[j++] = ' ';
+    j += filterword (dst + j, src + i + 1);
+  }
+  return j;
 }
 
 char *
-filter (char *src)
+filter (char *restrict src)
 {
   char *inp = src;
   char *out = src;
-  char *w;
-  size_t d;
+  char *word;
+  size_t n;
 
-  while (w = strtok_r (inp, " ", &inp), w) {
-    d = filterword (out, w, strlen (w));
-    if (d) {
-      out += d;
+  while (word = strtok_r (inp, " ", &inp), word) {
+    n = filterword (out, word);
+    if (n > 0) {
+      out += n;
       if (*inp)
         *out++ = ' ';
     }
