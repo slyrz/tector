@@ -110,19 +110,29 @@ scanner_readline (struct scanner *s, char *b, size_t l)
     return -1;
 
   while (c = get (s), c >= 0) {
+    /* Discard anything that isn't ASCII. */
     if (isunicode (c)) {
       while (c = peek (s), (c > 0) && (isunicode (c)))
         get (s);
       continue;
     }
+    /**
+     * Ignore whitespace. If a newline is part of the processed whitespace,
+     * stop.
+     */
     if (isspace (c)) {
       n = (c == '\n');
       while (c = peek (s), (c > 0) && (isspace (c)))
         n |= (get (s) == '\n');
       if (i == 0)
         continue;
+      /* Newline found? Stop. */
       if (n)
         break;
+      /**
+       * If there's a space already at the end of the buffer,
+       * avoid writing another.
+       */
       if (b[i - 1] == ' ')
         continue;
       c = ' ';
@@ -135,7 +145,7 @@ scanner_readline (struct scanner *s, char *b, size_t l)
   if (i >= l)
     return scanner_readline (s, b, l);
 
-  /* Remove space at the end of buffer with null. */
+  /* Replace space at the end of buffer with null-terminator. */
   nullterm (b, i);
   return 0;
 }

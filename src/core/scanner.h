@@ -3,6 +3,10 @@
 
 #include <stdlib.h>
 
+/**
+ * Scanner reads clean lines of ASCII text from a file descriptor.
+ * Non-ASCII characters and consecutive spaces will be ignored.
+ */
 struct scanner {
   int fd;
   size_t len;

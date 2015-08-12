@@ -6,6 +6,10 @@
 #include "vocab.h"
 #include "model.h"
 
+/**
+ * Bundle is just a wrapper to load/save a vocab and a model with a single
+ * function call.
+ */
 struct bundle {
   struct vocab *vocab;
   struct model *model;

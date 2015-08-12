@@ -4,6 +4,10 @@
 #include <stdint.h>
 #include <unistd.h>
 
+/**
+ * File provides convient functions for storing and reading complex
+ * data structures. It's used to serialize the vocab and the model.
+ */
 struct file {
   int fd;
   int mode;
