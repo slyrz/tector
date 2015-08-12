@@ -69,7 +69,7 @@ filterword (char *dst, const char *restrict src)
   }
 
   /**
-   * Stem the word. Ignore it if the stemmed word has less than 2 chars.
+   * Stem the word. Ignore it if the stemmed word has less than 2 characters.
    */
   if (j > 0) {
     if (j = stem (dst), j < 2)
