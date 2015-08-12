@@ -24,7 +24,6 @@ libcore_a_SOURCES = \
   src/model_nn.c \
   src/model_svd.c \
   src/model_glove.c \
-  src/ngram.c \
   src/program.c \
   src/scanner.c \
   src/stem.c \
