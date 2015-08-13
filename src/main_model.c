@@ -81,7 +81,7 @@ generate (int argc, char **argv)
   for (i = 0; i < b->vocab->len; i++) {
     printf ("%s ", b->vocab->entries[i].word);
     for (j = 0; j < n; j++)
-      printf ("%6.4f%c", b->model->embeddings[i * n + j], "\n "[j < (n - 1)]);
+      printf ("%f%c", b->model->embeddings[i * n + j], "\n "[j < (n - 1)]);
   }
 }
 
