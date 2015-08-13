@@ -54,7 +54,7 @@ train (int argc, char **argv)
   c = corpus_new (b->vocab);
   if (c == NULL)
     fatal ("corpus_new");
-  for (i = 0; i < argc; i++) {
+  for (i = 1; i < argc; i++) {
     if (corpus_parse (c, argv[i]) != 0)
       fatal ("corpus_parse");
     if (model_train (b->model, c) != 0)
