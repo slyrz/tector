@@ -69,20 +69,11 @@ int
 nn_load (struct model *base, struct file *f)
 {
   struct nn *m = (struct nn *) base;
-  char word[1024];
-  size_t i;
-  size_t j;
 
-  for (i = 0; i < base->size.vocab; i++) {
-    if (file_readstr (f, word, 1024) != 0)
-      goto error;
-    if (vocab_find (base->v, word, &j) == 0) {
-      if (file_read (f, m->syn0 + j * base->size.layer, base->size.layer * sizeof (float)) != 0)
-        goto error;
-    }
-    else if (file_skip (f, (off_t) (base->size.layer * sizeof (float))) != 0)
-      goto error;
-  }
+  if (file_read (f, m->syn0, base->size.layer * base->size.vocab * sizeof (float)) != 0)
+    goto error;
+  if (file_read (f, m->syn1, base->size.layer * base->size.vocab * sizeof (float)) != 0)
+    goto error;
   return 0;
 error:
   return -1;
@@ -92,14 +83,11 @@ int
 nn_save (struct model *base, struct file *f)
 {
   struct nn *m = (struct nn *) base;
-  size_t i;
 
-  for (i = 0; i < base->size.vocab; i++) {
-    if (file_writestr (f, base->v->entries[i].word) != 0)
-      goto error;
-    if (file_write (f, m->syn0 + i * base->size.layer, base->size.layer * sizeof (float)) != 0)
-      goto error;
-  }
+  if (file_write (f, m->syn0, base->size.layer * base->size.vocab * sizeof (float)) != 0)
+    goto error;
+  if (file_write (f, m->syn1, base->size.layer * base->size.vocab * sizeof (float)) != 0)
+    goto error;
   return 0;
 error:
   return -1;
