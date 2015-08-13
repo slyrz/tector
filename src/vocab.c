@@ -342,6 +342,14 @@ vocab_encode (struct vocab *v)
       entry->point[i - b] = point[b] - (int32_t) v->len;
     entry++;
   }
+
+  for (a = 0; a < v->len; a++) {
+    for (b = 0; b < MAX_CODE_LENGTH; b++) {
+      if ((v->entries[a].code >> b) <= 1)
+        v->entries[a].point[b] = 0;
+    }
+  }
+
 cleanup:
   mem_free (count);
   mem_free (binary);
