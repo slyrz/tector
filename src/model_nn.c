@@ -228,6 +228,12 @@ train_bag_of_words (struct nn *restrict m, struct sentence *restrict s)
   }
 }
 
+static inline float
+decay (float alpha, size_t i, size_t n)
+{
+  return max (0.05 * (1 - ((float) i / (float) (n + 1))), 0.05 * 0.0001);
+}
+
 int
 nn_train (struct model *base, struct corpus *c)
 {
@@ -243,8 +249,10 @@ nn_train (struct model *base, struct corpus *c)
 
   for (i = 0; i < base->size.iter; i++) {
     for (j = 0; j < c->sentences.len; j++) {
-      if ((j & 0xfff) == 0)
+      if ((j & 0xfff) == 0) {
         progress (j, c->sentences.len, "training %d/%d", i + 1, base->size.iter);
+        m->alpha = decay (m->alpha, i * c->sentences.len + j, base->size.iter * c->sentences.len);
+      }
       if (subsample (s, c->sentences.ptr[j], 511) == 0)
         continue;
       train_bag_of_words (m, s);
