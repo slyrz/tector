@@ -256,7 +256,7 @@ nn_train (struct model *base, struct corpus *c)
   for (i = 0; i < base->size.iter; i++) {
     for (j = 0; j < c->sentences.len; j++) {
       if ((j & 0xfff) == 0) {
-        progress (j, c->sentences.len, "training %d/%d", i + 1, base->size.iter);
+        progress (j, c->sentences.len, "train %zu/%zu", i + 1, base->size.iter);
         alpha_decay (m, i * c->sentences.len + j, base->size.iter * c->sentences.len);
       }
       if (subsample (s, c->sentences.ptr[j], 511) == 0)
