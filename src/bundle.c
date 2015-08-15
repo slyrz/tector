@@ -38,6 +38,9 @@ bundle_open (const char *path)
 {
   struct bundle *b;
 
+  if (path == NULL)
+    return NULL;
+
   b = mem_alloc (1, sizeof (struct bundle));
   if (b == NULL)
     return NULL;
