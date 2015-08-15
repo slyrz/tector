@@ -31,9 +31,9 @@ static unsigned int type = MODEL_NN;
 
 #define entry(x) [MODEL_ ## x] = #x
 static const char *model_name[] = {
-  entry(GLOVE),
-  entry(NN),
-  entry(SVD),
+  entry (GLOVE),
+  entry (NN),
+  entry (SVD),
 };
 #undef entry
 
