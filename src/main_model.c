@@ -23,10 +23,10 @@ struct program program = {
 };
 
 static struct bundle *b;
-static unsigned int iterations = 5;
-static unsigned int layer = 50;
-static unsigned int vector = 50;
-static unsigned int window = 5;
+static unsigned int iterations;
+static unsigned int layer;
+static unsigned int vector;
+static unsigned int window;
 static unsigned int type = MODEL_NN;
 
 static void
@@ -37,10 +37,14 @@ create (void)
   b->model = model_new (b->vocab, type);
   if (b->model == NULL)
     fatal ("model_new");
-  b->model->size.layer = layer;
-  b->model->size.vector = vector;
-  b->model->size.window = window;
-  b->model->size.iter = iterations;
+  if (layer)
+    b->model->size.layer = layer;
+  if (vector)
+    b->model->size.vector = vector;
+  if (window)
+    b->model->size.window = window;
+  if (iterations)
+    b->model->size.iter = iterations;
   model_verify (b->model);
 }
 

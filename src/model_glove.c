@@ -46,7 +46,10 @@ const struct model_interface interface_glove = {
 int
 glove_init (struct model *base)
 {
-  (void) base;
+  base->size.vector = 64;
+  base->size.layer = 320;
+  base->size.window = 5;
+  base->size.iter = 10;
   return 0;
 }
 

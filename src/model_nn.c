@@ -51,7 +51,10 @@ const float alpha = 0.05;
 int
 nn_init (struct model *base)
 {
-  (void) base;
+  base->size.layer = 64;
+  base->size.vector = 64;
+  base->size.window = 5;
+  base->size.iter = 5;
   return 0;
 }
 

@@ -50,9 +50,6 @@ model_new (struct vocab *v, unsigned int type)
   m->v = v;
   m->type = type;
   m->size.vocab = v->len;
-  m->size.layer = 64;
-  m->size.vector = 64;
-  m->size.window = 5;
   if (m->i->init (m) != 0)
     goto error;
   m->state.changed = 1;

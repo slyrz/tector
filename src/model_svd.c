@@ -39,7 +39,9 @@ const struct model_interface interface_svd = {
 int
 svd_init (struct model *base)
 {
-  (void) base;
+  base->size.vector = 64;
+  base->size.layer = 320;
+  base->size.window = 5;
   return 0;
 }
 
