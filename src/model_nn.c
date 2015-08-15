@@ -32,6 +32,7 @@ int nn_save (struct model *, struct file *);
 int nn_alloc (struct model *);
 int nn_train (struct model *, struct corpus *);
 int nn_generate (struct model *);
+int nn_verify (struct model *);
 
 const struct model_interface interface_nn = {
   .size = sizeof (struct nn),
@@ -42,6 +43,7 @@ const struct model_interface interface_nn = {
   .alloc = nn_alloc,
   .train = nn_train,
   .generate = nn_generate,
+  .verify = nn_verify,
 };
 
 const float alpha = 0.05;
@@ -269,5 +271,21 @@ nn_generate (struct model *base)
   struct nn *m = (struct nn *) base;
 
   base->embeddings = m->syn0;
+  return 0;
+}
+
+int
+nn_verify (struct model *base)
+{
+  base->size.iter = max (base->size.iter, 1);
+  if (base->size.iter < 5)
+    warning ("consider using >= 5 iterations");
+
+  /**
+   * Vector and layer size should be the same. If they have different values,
+   * use the largest for both.
+   */
+  base->size.vector = max (base->size.layer, base->size.vector);
+  base->size.layer = base->size.vector;
   return 0;
 }

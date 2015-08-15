@@ -150,3 +150,9 @@ model_generate (struct model *m)
     return -1;
   return m->i->generate (m);
 }
+
+int
+model_verify (struct model *m)
+{
+  return m->i->verify (m);
+}

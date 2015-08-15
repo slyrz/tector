@@ -22,6 +22,7 @@ int svd_save (struct model *, struct file *);
 int svd_alloc (struct model *);
 int svd_train (struct model *, struct corpus *);
 int svd_generate (struct model *);
+int svd_verify (struct model *);
 
 const struct model_interface interface_svd = {
   .size = sizeof (struct svd),
@@ -32,6 +33,7 @@ const struct model_interface interface_svd = {
   .alloc = svd_alloc,
   .train = svd_train,
   .generate = svd_generate,
+  .verify = svd_verify,
 };
 
 int
@@ -147,4 +149,17 @@ svd_generate (struct model *base)
 error:
   mem_free (p);
   return -1;
+}
+
+int
+svd_verify (struct model *base)
+{
+  /**
+   * The layer size must be twice as large as the vector size, but
+   * should be larger.
+   */
+  base->size.layer = max (base->size.layer, 2 * base->size.vector);
+  if (base->size.layer == 2 * base->size.vector)
+    warning ("consider using a larger layer size (>= %zu)", 4 * base->size.vector);
+  return 0;
 }

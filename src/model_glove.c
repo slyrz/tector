@@ -29,6 +29,7 @@ int glove_save (struct model *, struct file *);
 int glove_alloc (struct model *);
 int glove_train (struct model *, struct corpus *);
 int glove_generate (struct model *);
+int glove_verify (struct model *);
 
 const struct model_interface interface_glove = {
   .size = sizeof (struct glove),
@@ -39,6 +40,7 @@ const struct model_interface interface_glove = {
   .alloc = glove_alloc,
   .train = glove_train,
   .generate = glove_generate,
+  .verify = glove_verify,
 };
 
 int
@@ -222,4 +224,13 @@ done:
   mem_free (bia0);
   mem_free (bia1);
   return r;
+}
+
+int
+glove_verify (struct model *base)
+{
+  base->size.layer = max (base->size.layer, 2 * base->size.vector);
+  if (base->size.iter < 10)
+    warning ("consider using >= 10 iterations");
+  return 0;
 }

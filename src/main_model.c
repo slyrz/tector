@@ -41,6 +41,7 @@ create (void)
   b->model->size.vector = vector;
   b->model->size.window = window;
   b->model->size.iter = iterations;
+  model_verify (b->model);
 }
 
 static void
