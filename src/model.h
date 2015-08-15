@@ -8,9 +8,10 @@
 #include "file.h"
 
 enum {
-  MODEL_GLOVE,
+  MODEL_GLOVE = 0,
   MODEL_NN,
   MODEL_SVD,
+  NUM_MODELS,
 };
 
 struct model {

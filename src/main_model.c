@@ -29,6 +29,14 @@ static unsigned int vector;
 static unsigned int window;
 static unsigned int type = MODEL_NN;
 
+#define entry(x) [MODEL_ ## x] = #x
+static const char *model_name[] = {
+  entry(GLOVE),
+  entry(NN),
+  entry(SVD),
+};
+#undef entry
+
 static void
 create (void)
 {
@@ -105,12 +113,12 @@ main (int argc, char **argv)
   program_getoptstr ('t', &typestr);
 
   if (typestr) {
-    if (strcmp (typestr, "glove") == 0)
-      type = MODEL_GLOVE;
-    if (strcmp (typestr, "nn") == 0)
-      type = MODEL_NN;
-    if (strcmp (typestr, "svd") == 0)
-      type = MODEL_SVD;
+    for (type = 0; type < NUM_MODELS; type++) {
+      if (strcasecmp (typestr, model_name[type]) == 0)
+        break;
+    }
+    if (type == NUM_MODELS)
+      fatal ("unkown model %s", typestr);
   }
 
   b = bundle_open (program_poparg ());
