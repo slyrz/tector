@@ -48,8 +48,7 @@ const struct model_interface interface_nn = {
 
 const float alpha = 0.05;
 
-static
-int
+static int
 nn_init (struct model *base)
 {
   base->size.layer = 64;
