@@ -37,7 +37,6 @@ main (void)
 {
   struct vocab *v;
   size_t i;
-  size_t j;
 
   v = vocab_new ();
   v->min = 0;
