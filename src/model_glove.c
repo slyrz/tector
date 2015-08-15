@@ -22,14 +22,14 @@ struct glove {
   float *cnt;
 };
 
-int glove_init (struct model *);
-int glove_free (struct model *);
-int glove_load (struct model *, struct file *);
-int glove_save (struct model *, struct file *);
-int glove_alloc (struct model *);
-int glove_train (struct model *, struct corpus *);
-int glove_generate (struct model *);
-int glove_verify (struct model *);
+static int glove_init (struct model *);
+static int glove_free (struct model *);
+static int glove_load (struct model *, struct file *);
+static int glove_save (struct model *, struct file *);
+static int glove_alloc (struct model *);
+static int glove_train (struct model *, struct corpus *);
+static int glove_generate (struct model *);
+static int glove_verify (struct model *);
 
 const struct model_interface interface_glove = {
   .size = sizeof (struct glove),
@@ -43,7 +43,7 @@ const struct model_interface interface_glove = {
   .verify = glove_verify,
 };
 
-int
+static int
 glove_init (struct model *base)
 {
   base->size.vector = 64;
@@ -53,7 +53,7 @@ glove_init (struct model *base)
   return 0;
 }
 
-int
+static int
 glove_free (struct model *base)
 {
   struct glove *m = (struct glove *) base;
@@ -62,7 +62,7 @@ glove_free (struct model *base)
   return 0;
 }
 
-int
+static int
 glove_load (struct model *base, struct file *f)
 {
   struct glove *m = (struct glove *) base;
@@ -70,7 +70,7 @@ glove_load (struct model *base, struct file *f)
   return file_read (f, m->cnt, base->size.vocab * base->size.layer * sizeof (float));
 }
 
-int
+static int
 glove_save (struct model *base, struct file *f)
 {
   struct glove *m = (struct glove *) base;
@@ -78,7 +78,7 @@ glove_save (struct model *base, struct file *f)
   return file_write (f, m->cnt, base->size.vocab * base->size.layer * sizeof (float));
 }
 
-int
+static int
 glove_alloc (struct model *base)
 {
   struct glove *m = (struct glove *) base;
@@ -116,7 +116,7 @@ train (struct glove *restrict m, struct sentence *restrict s)
   }
 }
 
-int
+static int
 glove_train (struct model *base, struct corpus *c)
 {
   struct glove *m = (struct glove *) base;
@@ -130,7 +130,7 @@ glove_train (struct model *base, struct corpus *c)
   return 0;
 }
 
-int
+static int
 glove_generate (struct model *base)
 {
   struct glove *m = (struct glove *) base;
@@ -234,7 +234,7 @@ done:
   return r;
 }
 
-int
+static int
 glove_verify (struct model *base)
 {
   base->size.layer = max (base->size.layer, 2 * base->size.vector);

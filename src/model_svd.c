@@ -15,14 +15,14 @@ struct svd {
   float *cnt;
 };
 
-int svd_init (struct model *);
-int svd_free (struct model *);
-int svd_load (struct model *, struct file *);
-int svd_save (struct model *, struct file *);
-int svd_alloc (struct model *);
-int svd_train (struct model *, struct corpus *);
-int svd_generate (struct model *);
-int svd_verify (struct model *);
+static int svd_init (struct model *);
+static int svd_free (struct model *);
+static int svd_load (struct model *, struct file *);
+static int svd_save (struct model *, struct file *);
+static int svd_alloc (struct model *);
+static int svd_train (struct model *, struct corpus *);
+static int svd_generate (struct model *);
+static int svd_verify (struct model *);
 
 const struct model_interface interface_svd = {
   .size = sizeof (struct svd),
@@ -36,7 +36,7 @@ const struct model_interface interface_svd = {
   .verify = svd_verify,
 };
 
-int
+static int
 svd_init (struct model *base)
 {
   base->size.vector = 64;
@@ -45,7 +45,7 @@ svd_init (struct model *base)
   return 0;
 }
 
-int
+static int
 svd_free (struct model *base)
 {
   struct svd *m = (struct svd *) base;
@@ -54,7 +54,7 @@ svd_free (struct model *base)
   return 0;
 }
 
-int
+static int
 svd_load (struct model *base, struct file *f)
 {
   struct svd *m = (struct svd *) base;
@@ -62,7 +62,7 @@ svd_load (struct model *base, struct file *f)
   return file_read (f, m->cnt, base->size.vocab * base->size.layer * sizeof (float));
 }
 
-int
+static int
 svd_save (struct model *base, struct file *f)
 {
   struct svd *m = (struct svd *) base;
@@ -70,7 +70,7 @@ svd_save (struct model *base, struct file *f)
   return file_write (f, m->cnt, base->size.vocab * base->size.layer * sizeof (float));
 }
 
-int
+static int
 svd_alloc (struct model *base)
 {
   struct svd *m = (struct svd *) base;
@@ -108,7 +108,7 @@ train (struct svd *restrict m, struct sentence *restrict s)
   }
 }
 
-int
+static int
 svd_train (struct model *base, struct corpus *c)
 {
   struct svd *m = (struct svd *) base;
@@ -122,7 +122,7 @@ svd_train (struct model *base, struct corpus *c)
   return 0;
 }
 
-int
+static int
 svd_generate (struct model *base)
 {
   struct svd *m = (struct svd *) base;
@@ -153,7 +153,7 @@ error:
   return -1;
 }
 
-int
+static int
 svd_verify (struct model *base)
 {
   /**

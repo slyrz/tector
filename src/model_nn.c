@@ -25,14 +25,14 @@ struct nn {
   float *neu2;
 };
 
-int nn_init (struct model *);
-int nn_free (struct model *);
-int nn_load (struct model *, struct file *);
-int nn_save (struct model *, struct file *);
-int nn_alloc (struct model *);
-int nn_train (struct model *, struct corpus *);
-int nn_generate (struct model *);
-int nn_verify (struct model *);
+static int nn_init (struct model *);
+static int nn_free (struct model *);
+static int nn_load (struct model *, struct file *);
+static int nn_save (struct model *, struct file *);
+static int nn_alloc (struct model *);
+static int nn_train (struct model *, struct corpus *);
+static int nn_generate (struct model *);
+static int nn_verify (struct model *);
 
 const struct model_interface interface_nn = {
   .size = sizeof (struct nn),
@@ -48,6 +48,7 @@ const struct model_interface interface_nn = {
 
 const float alpha = 0.05;
 
+static
 int
 nn_init (struct model *base)
 {
@@ -58,7 +59,7 @@ nn_init (struct model *base)
   return 0;
 }
 
-int
+static int
 nn_free (struct model *base)
 {
   struct nn *m = (struct nn *) base;
@@ -70,7 +71,7 @@ nn_free (struct model *base)
   return 0;
 }
 
-int
+static int
 nn_load (struct model *base, struct file *f)
 {
   struct nn *m = (struct nn *) base;
@@ -84,7 +85,7 @@ error:
   return -1;
 }
 
-int
+static int
 nn_save (struct model *base, struct file *f)
 {
   struct nn *m = (struct nn *) base;
@@ -98,7 +99,7 @@ error:
   return -1;
 }
 
-int
+static int
 nn_alloc (struct model *base)
 {
   struct nn *m = (struct nn *) base;
@@ -239,7 +240,7 @@ alpha_decay (struct nn *restrict m, size_t i, size_t n)
   m->alpha = max (alpha * (1 - ((float) i / (float) (n + 1))), alpha * 0.0001);
 }
 
-int
+static int
 nn_train (struct model *base, struct corpus *c)
 {
   struct nn *m = (struct nn *) base;
@@ -268,7 +269,7 @@ nn_train (struct model *base, struct corpus *c)
   return 0;
 }
 
-int
+static int
 nn_generate (struct model *base)
 {
   struct nn *m = (struct nn *) base;
@@ -277,7 +278,7 @@ nn_generate (struct model *base)
   return 0;
 }
 
-int
+static int
 nn_verify (struct model *base)
 {
   base->size.iter = max (base->size.iter, 1);
