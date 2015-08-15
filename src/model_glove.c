@@ -157,6 +157,7 @@ glove_generate (struct model *base)
   long long i;
   long long j;
   long long k;
+  size_t n;
 
   int r = 0;
 
@@ -183,35 +184,39 @@ glove_generate (struct model *base)
   for (i = 0; i < se * sl; i++)
     grd1[i] = 1.0;
 
-  cost = 0.0;
-  for (i = 0; i < sv; i++) {
-    for (j = 0; j < sl; j++) {
-      if (m->cnt[i * sl + j] == 0.0)
-        continue;
+  for (n = 0; n < base->size.iter; n++) {
+    cost = 0.0;
+    for (i = 0; i < sv; i++) {
+      if ((i & 0x1ff) == 0)
+        progress (i, sv, "generate %zu/%zu", n + 1, base->size.iter);
+      for (j = 0; j < sl; j++) {
+        if (m->cnt[i * sl + j] == 0.0)
+          continue;
 
-      dd = 0.0;
-      for (k = 0; k < se; k++)
-        dd += vec0[i * se + k] * vec1[j * se + k];
-      dd += bia0[2 * i] + bia1[2 * j] - logf (m->cnt[i * sl + j]);
-      if (m->cnt[i * sl + j] > xmax)
-        df = dd;
-      else
-        df = dd * powf (m->cnt[i * sl + j] / xmax, alpha);
-      cost += (dd * df) / 2.0;
+        dd = 0.0;
+        for (k = 0; k < se; k++)
+          dd += vec0[i * se + k] * vec1[j * se + k];
+        dd += bia0[2 * i] + bia1[2 * j] - logf (m->cnt[i * sl + j]);
+        if (m->cnt[i * sl + j] > xmax)
+          df = dd;
+        else
+          df = dd * powf (m->cnt[i * sl + j] / xmax, alpha);
+        cost += (dd * df) / 2.0;
 
-      df *= eta;
-      for (k = 0; k < se; k++) {
-        t0 = df * vec1[j * se + k];
-        t1 = df * vec0[i * se + k];
-        vec0[i * se + k] -= t0 / sqrtf (grd0[i]);
-        vec1[j * se + k] -= t1 / sqrtf (grd1[j]);
-        grd0[i] += t0 * t0;
-        grd1[j] += t1 * t1;
+        df *= eta;
+        for (k = 0; k < se; k++) {
+          t0 = df * vec1[j * se + k];
+          t1 = df * vec0[i * se + k];
+          vec0[i * se + k] -= t0 / sqrtf (grd0[i]);
+          vec1[j * se + k] -= t1 / sqrtf (grd1[j]);
+          grd0[i] += t0 * t0;
+          grd1[j] += t1 * t1;
+        }
+        bia0[2 * i + 0] -= df / sqrtf (grd0[i]);
+        bia1[2 * j + 0] -= df / sqrtf (grd1[j]);
+        bia0[2 * i + 1] += df * df;
+        bia1[2 * j + 1] += df * df;
       }
-      bia0[2 * i + 0] -= df / sqrtf (grd0[i]);
-      bia1[2 * j + 0] -= df / sqrtf (grd1[j]);
-      bia0[2 * i + 1] += df * df;
-      bia1[2 * j + 1] += df * df;
     }
   }
 
