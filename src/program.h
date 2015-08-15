@@ -7,7 +7,7 @@ struct command {
   const char *name;
   const char *args;
   const char *opts;
-  void (*main) (int argc, char **argv);
+  void (*main) (void);
 };
 
 struct program {
@@ -26,6 +26,7 @@ struct program {
   } while (0)
 
 int program_parseargs (int argc, char **argv);
+char* program_poparg (void);
 
 void program_run (void);
 void program_getoptstr (char c, const char **r);

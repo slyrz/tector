@@ -34,14 +34,17 @@ filter_lines (struct scanner *s)
 int
 main (int argc, char **argv)
 {
-  int i;
+  char *arg;
 
   program_init (argc, argv);
-  if (argc == 0)
+
+  arg = program_poparg ();
+  if (arg == NULL)
     filter_lines (scanner_new (STDIN_FILENO));
-  for (i = 0; i < argc; i++) {
-    if (filter_lines (scanner_open (argv[i])) != 0)
-      error ("failed to open '%s'", argv[i]);
+  while (arg) {
+    if (filter_lines (scanner_open (arg)) != 0)
+      error ("failed to open '%s'", arg);
+    arg = program_poparg ();
   }
   return 0;
 }

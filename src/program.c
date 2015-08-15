@@ -256,11 +256,23 @@ error:
   exit (-1);
 }
 
+char*
+program_poparg (void)
+{
+  char *arg;
+  if (state.argc <= 0)
+    return NULL;
+  arg = state.argv[0];
+  state.argc--;
+  state.argv++;
+  return arg;
+}
+
 void
 program_run (void)
 {
   if ((state.command) && (state.command->main))
-    state.command->main (state.argc, state.argv);
+    state.command->main ();
 }
 
 void

@@ -7,9 +7,9 @@
 #include "log.h"
 #include "model.h"
 
-static void create (int argc, char **argv);
-static void train (int argc, char **argv);
-static void generate (int argc, char **argv);
+static void create (void);
+static void train (void);
+static void generate (void);
 
 struct program program = {
   .name = "model",
@@ -30,7 +30,7 @@ static unsigned int window = 5;
 static unsigned int type = MODEL_NN;
 
 static void
-create (int argc, char **argv)
+create (void)
 {
   if (b->model)
     fatal ("model exists");
@@ -44,18 +44,20 @@ create (int argc, char **argv)
 }
 
 static void
-train (int argc, char **argv)
+train (void)
 {
   struct corpus *c;
-  int i;
+  char *arg;
 
   if (b->model == NULL)
     fatal ("model missing");
   c = corpus_new (b->vocab);
   if (c == NULL)
     fatal ("corpus_new");
-  for (i = 1; i < argc; i++) {
-    if (corpus_parse (c, argv[i]) != 0)
+
+  while (arg = program_poparg (), arg != NULL) {
+    debug ("%s\n", arg);
+    if (corpus_parse (c, arg) != 0)
       fatal ("corpus_parse");
     if (model_train (b->model, c) != 0)
       fatal ("model_train");
@@ -65,7 +67,7 @@ train (int argc, char **argv)
 }
 
 static void
-generate (int argc, char **argv)
+generate (void)
 {
   size_t n;
   size_t i;
@@ -106,7 +108,7 @@ main (int argc, char **argv)
       type = MODEL_SVD;
   }
 
-  b = bundle_open (argv[0]);
+  b = bundle_open (program_poparg ());
   if (b == NULL)
     fatal ("bundle_open");
   program_run ();

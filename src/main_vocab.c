@@ -5,9 +5,9 @@
 #include "log.h"
 #include "vocab.h"
 
-static void create (int, char **);
-static void train (int, char **);
-static void print (int, char **);
+static void create (void);
+static void train (void);
+static void print (void);
 
 struct program program = {
   .name = "vocab",
@@ -24,7 +24,7 @@ static struct bundle *b;
 static unsigned int min = 10;
 
 static void
-create (int argc, char **argv)
+create (void)
 {
   if (b->vocab)
     fatal ("vocab exists");
@@ -35,20 +35,20 @@ create (int argc, char **argv)
 }
 
 static void
-train (int argc, char **argv)
+train (void)
 {
-  int i;
+  char *arg;
 
   if (b->vocab == NULL)
     fatal ("vocab missing");
-  for (i = 1; i < argc; i++) {
-    if (vocab_parse (b->vocab, argv[i]) != 0)
-      error ("vocab_parse '%s' failed", argv[i]);
+  while (arg = program_poparg (), arg != NULL) {
+    if (vocab_parse (b->vocab, arg) != 0)
+      error ("vocab_parse '%s' failed", arg);
   }
 }
 
 static void
-print (int argc, char **argv)
+print (void)
 {
   size_t i;
 
@@ -64,7 +64,7 @@ main (int argc, char **argv)
   program_init (argc, argv);
   program_getoptuint ('m', &min);
 
-  b = bundle_open (argv[0]);
+  b = bundle_open (program_poparg ());
   if (b == NULL)
     fatal ("bundle_open");
   program_run ();
