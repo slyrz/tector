@@ -44,12 +44,11 @@ const struct model_interface interface_nn = {
   .generate = nn_generate,
 };
 
+const float alpha = 0.05;
+
 int
 nn_init (struct model *base)
 {
-  struct nn *m = (struct nn *) base;
-
-  m->alpha = 0.05f;
   return 0;
 }
 
@@ -228,10 +227,10 @@ train_bag_of_words (struct nn *restrict m, struct sentence *restrict s)
   }
 }
 
-static inline float
-decay (float alpha, size_t i, size_t n)
+static inline void
+alpha_decay (struct nn *restrict m, size_t i, size_t n)
 {
-  return max (0.05 * (1 - ((float) i / (float) (n + 1))), 0.05 * 0.0001);
+  m->alpha = max (alpha * (1 - ((float) i / (float) (n + 1))), alpha * 0.0001);
 }
 
 int
@@ -247,11 +246,12 @@ nn_train (struct model *base, struct corpus *c)
   if (s == NULL)
     return -1;
 
+  m->alpha = alpha;
   for (i = 0; i < base->size.iter; i++) {
     for (j = 0; j < c->sentences.len; j++) {
       if ((j & 0xfff) == 0) {
         progress (j, c->sentences.len, "training %d/%d", i + 1, base->size.iter);
-        m->alpha = decay (m->alpha, i * c->sentences.len + j, base->size.iter * c->sentences.len);
+        alpha_decay (m, i * c->sentences.len + j, base->size.iter * c->sentences.len);
       }
       if (subsample (s, c->sentences.ptr[j], 511) == 0)
         continue;
