@@ -16,7 +16,6 @@ libcore_a_SOURCES = \
   src/corpus.c \
   src/exp.c \
   src/file.c \
-  src/filter.c \
   src/hash.c \
   src/linalg.c \
   src/mem.c \

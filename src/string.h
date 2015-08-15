@@ -16,5 +16,6 @@ int ordalpha (int c);
 
 char *nullterm (char *s, size_t l);
 char *formatsize (char *s, size_t v);
+char *filter (char *s);
 
 #endif

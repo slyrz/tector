@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "program.h"
-#include "filter.h"
 #include "log.h"
+#include "program.h"
 #include "scanner.h"
+#include "string.h"
 
 struct program program = {
   .name = "filter",
