@@ -49,6 +49,7 @@ const float alpha = 0.05;
 int
 nn_init (struct model *base)
 {
+  (void) base;
   return 0;
 }
 

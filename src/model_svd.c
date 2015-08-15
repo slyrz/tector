@@ -37,6 +37,7 @@ const struct model_interface interface_svd = {
 int
 svd_init (struct model *base)
 {
+  (void) base;
   return 0;
 }
 

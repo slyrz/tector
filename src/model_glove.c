@@ -44,6 +44,7 @@ const struct model_interface interface_glove = {
 int
 glove_init (struct model *base)
 {
+  (void) base;
   return 0;
 }
 
