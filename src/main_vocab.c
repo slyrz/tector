@@ -8,6 +8,7 @@
 static void create (void);
 static void train (void);
 static void print (void);
+static void shrink (void);
 
 struct program program = {
   .name = "vocab",
@@ -16,6 +17,7 @@ struct program program = {
     { .name = "create", .args = "DIR", .opts = "m", .main = create },
     { .name = "train", .args = "DIR TEXTFILE...", .main = train },
     { .name = "print", .args = "DIR", .main = print },
+    { .name = "shrink", .args = "DIR", .opts = "m", .main = shrink },
     {},
   },
 };
@@ -56,6 +58,14 @@ print (void)
     fatal ("vocab missing");
   for (i = 0; i < b->vocab->len; i++)
     printf ("%8u %s\n", b->vocab->entries[i].count, b->vocab->entries[i].word);
+}
+
+static void
+shrink (void)
+{
+  if (b->vocab == NULL)
+    fatal ("vocab missing");
+  b->vocab->min = min;
 }
 
 int
