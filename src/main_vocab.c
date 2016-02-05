@@ -9,6 +9,7 @@ static void create (void);
 static void train (void);
 static void print (void);
 static void shrink (void);
+static void copy (void);
 
 struct program program = {
   .name = "vocab",
@@ -18,6 +19,7 @@ struct program program = {
     { .name = "train", .args = "DIR TEXTFILE...", .main = train },
     { .name = "print", .args = "DIR", .main = print },
     { .name = "shrink", .args = "DIR", .opts = "m", .main = shrink },
+    { .name = "copy", .args = "DIR TEXTFILE...", .main = copy },
     {},
   },
 };
@@ -66,6 +68,19 @@ shrink (void)
   if (b->vocab == NULL)
     fatal ("vocab missing");
   b->vocab->min = min;
+}
+
+static void
+copy (void)
+{
+  char *arg;
+
+  if (b->vocab == NULL)
+    fatal ("vocab missing");
+  while (arg = program_poparg (), arg != NULL) {
+    if (vocab_copy (b->vocab, arg) != 0)
+      error ("vocab_copy '%s' failed", arg);
+  }
 }
 
 int

@@ -158,6 +158,28 @@ vocab_parse (struct vocab *v, const char *path)
   return r;
 }
 
+int
+vocab_copy (struct vocab *v, const char *path)
+{
+  struct scanner *s;
+  char b[8192] = { 0 };
+  int r = 0;
+
+  s = scanner_open (path);
+  if (s == NULL)
+    return -1;
+  while (scanner_readline (s, b, sizeof (b)) >= 0) {
+    char *c = b;
+    char *w = b;
+    c = strtok_r (w, " ", &w);
+    if (w == NULL)
+      break;
+    vocab_add_count (v, w, atoi(c));
+  }
+  scanner_free (s);
+  return r;
+}
+
 static inline float
 load_factor (const struct vocab *v)
 {
@@ -210,7 +232,7 @@ find (struct vocab *v, uint32_t h, const char *w)
 }
 
 int
-vocab_add (struct vocab *v, const char *w)
+vocab_add_count (struct vocab *v, const char *w, uint32_t count)
 {
   struct vocab_entry entry;
 
@@ -218,7 +240,7 @@ vocab_add (struct vocab *v, const char *w)
   size_t i = find (v, h, w);
 
   if (v->table[i]) {
-    v->table[i]->count++;
+    v->table[i]->count += count;
     return 0;
   }
 
@@ -233,7 +255,7 @@ vocab_add (struct vocab *v, const char *w)
 
   entry = (struct vocab_entry) {
     .hash = h,
-    .count = 1,
+    .count = count,
   };
   strncpy (entry.word, w, MAX_WORD_LENGTH - 1);
 
@@ -241,6 +263,12 @@ vocab_add (struct vocab *v, const char *w)
   v->table[i] = &v->entries[v->len];
   v->len++;
   return 0;
+}
+
+int
+vocab_add (struct vocab *v, const char *w)
+{
+  return vocab_add_count (v, w, 1);
 }
 
 int
