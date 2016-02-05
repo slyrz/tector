@@ -69,6 +69,7 @@ train (void)
     fatal ("corpus_new");
 
   while (arg = program_poparg (), arg != NULL) {
+    info ("training on '%s'", arg);
     if (corpus_parse (c, arg) != 0)
       fatal ("corpus_parse");
     if (model_train (b->model, c) != 0)
