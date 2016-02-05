@@ -10,6 +10,7 @@
 static void create (void);
 static void train (void);
 static void generate (void);
+static void print (void);
 
 struct program program = {
   .name = "model",
@@ -18,6 +19,7 @@ struct program program = {
     { .name = "create", .args = "DIR", .opts = "iltvw", .main = create },
     { .name = "train", .args = "DIR TEXTFILE...", .main = train },
     { .name = "generate", .args = "DIR", .main = generate },
+    { .name = "print", .args = "DIR", .main = print },
     {},
   },
 };
@@ -98,6 +100,19 @@ generate (void)
     for (j = 0; j < n; j++)
       printf ("%f%c", b->model->embeddings[i * n + j], "\n "[j < (n - 1)]);
   }
+}
+
+static void
+print (void)
+{
+  if (b->model == NULL)
+    fatal ("model missing");
+
+  printf ("Model %s\n",  model_name[b->model->type]);
+  printf (" - Iterations: %zu\n", b->model->size.iter);
+  printf (" - Layer: %zu dimensions\n", b->model->size.layer);
+  printf (" - Vector: %zu dimensions\n", b->model->size.vector);
+  printf (" - Window-Size: %zu\n", b->model->size.window);
 }
 
 int
